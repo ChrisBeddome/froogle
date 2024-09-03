@@ -34,13 +34,14 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 - **ENT** - Entertainment/Leisure
 - **HOS** - Housing (rent, utilities, insurance, interest portion of mortgage, property tax)
 - **SRV** - Services (phone, internet, etc.)
-- **HOM** - Home Improvement, household supplies
+- **HOM** - Home Improvement, household supplies, decor
 - **TRP** - Transportation (gas, repair, insurance)
 - **PET** - Pets
 - **CLT** - Clothing
-- **HLT** - Health
+- **HLT** - Health (includes self care)
 - **GFT** - Gifts
 - **SLF** - Self Improvement (education, gym)
+- **TOY** - toys, hobbies (music gear, headphones, frisbee etc)
 - **MSC** - Miscellaneous
 - **INC** - Income
 - **SAV** - Savings

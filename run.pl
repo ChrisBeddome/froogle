@@ -4,6 +4,7 @@ use feature 'say';
 
 use constant DATA_FILE_PATH => "./test/data.txt";
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
+use constant CATEGORY_CODES => qw(GRC DNG ENT HOS SRV HOM TRP PET CLT HLT GFT SLF MSC INC SAV ASS);
 use constant COMMAND_MAPPING => {
     "overview" => \&overview
 };
@@ -140,7 +141,7 @@ sub validate_expense {
 
     return "Invalid number of fields" unless @fields >= 6 && @fields <= 8;
 
-    my %valid_codes = map { $_ => 1 } qw(GRC DNG ENT HOS SRV HOM TRP PET CLT HLT GFT SLF MSC INC SAV ASS);
+    my %valid_codes = map { $_ => 1 } CATEGORY_CODES;
     unless (exists $valid_codes{$fields[3]}) {
         return "Invalid category code";
     }
