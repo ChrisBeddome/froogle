@@ -2,49 +2,114 @@ use strict;
 use warnings;
 use feature 'say';
 
-# my $data_file_path = "./test/data.txt";
-my $data_file_path = "../../../finance/spending.txt";
+use constant DATA_FILE_PATH => "./test/data.txt";
+use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
+use constant COMMAND_MAPPING => {
+    "overview" => \&overview
+};
 
-open(my $fh, '<', $data_file_path) or die "Error when attempting to open file $data_file_path:\n$!";
+main();
 
-while (my $line = <$fh>) {
-    chomp $line;
-    my $error = validate_line($line);
-    if ($error) {
-        say "Error in line: $line - $error";
+sub main {
+    my $command = $ARGV[0] || "overview";
+    my $arg = $ARGV[1];
+    my $func = COMMAND_MAPPING->{$command} ;
+    die "Command not recognized: $command" if !defined $func;
+    $func->();
+}
+
+sub process {
+    my $execution_block = shift;
+
+    unless (ref $execution_block eq 'CODE') {
+        die "The first argument must be a code reference.";
+    }
+
+    open(my $fh, '<', DATA_FILE_PATH) or die "Error when attempting to open file" .  DATA_FILE_PATH . ":\n$!";
+
+    my @errors = validate_file($fh);
+    if (@errors > 0) {
+        report_errors(@errors);
+        close($fh);
+        die "Data contains errors; Exiting."
+    }
+
+    my $transactions = parse_file($fh);
+    close($fh);
+
+    foreach my $transaction (@$transactions) {
+        $execution_block->($transaction);
     }
 }
 
-seek($fh, 0, 0) or die "Could not seek: $!";
+sub overview {
+    my $spending = 0;
+    my $income = 0;
+    my $owe_zz = 0;
 
-my $spending = 0;
-my $income = 0;
-my $owe_zz = 0;
+    process(sub {
+        my $transaction = shift;
+        if ($transaction->{type} eq "IN") { 
+            $income += $transaction->{amount};
+        } else {
+            $spending += $transaction->{amount};
+        }
 
-while (my $line = <$fh>) {
-    my @fields = split /\s*;\s*/, $line;
+        if (defined $transaction->{owe_zz} && !$transaction->{settled}) {
+            $owe_zz += $transaction->{owe_zz};
+        }
 
-    if ($fields[1] eq "IN") { 
-        $income += $fields[2];
-    } else {
-        $spending += $fields[2];
-    }
+    });
 
-    if (scalar @fields == 8 && $fields[7] == 0) {
-        $owe_zz += $fields[6];
-    }
+    say "Total Spending: ${spending}";
+    say "Total Income:   ${income}";
+    say "Chris Owes ZZ:  ${owe_zz}";
 }
 
-say "Total Spending: ${spending}";
-say "Total Income:   ${income}";
-say "Chris Owes ZZ:  ${owe_zz}";
+sub validate_file {
+    my $fh = shift;
+    my @errors = ();
 
-close($fh);
+    while (my $line = <$fh>) {
+        chomp $line;
+        my $error = validate_line($line);
+        if ($error) {
+            push(@errors, {line => $., message => $error}); 
+        }
+    }
+
+    seek($fh, 0, 0) or die "Could not seek: $!";
+    return @errors;
+}
+
+sub parse_file {
+    my $fh = shift;
+    my @records;
+
+    while (my $line = <$fh>) {
+        chomp $line;
+
+        my @values = split_line($line);
+        my @keys = KEY_MAPPING;
+        my %record;
+
+        @record{@keys} = (undef) x @keys;
+
+        for my $i (0 .. $#keys) {
+            if (defined $values[$i] && $values[$i] ne '') {
+                $record{$keys[$i]} = $values[$i];
+            }
+        }
+
+        push @records, \%record;
+    }
+
+    return \@records;
+}
 
 sub validate_line {
     my ($line) = @_;
-    my @fields = split /\s*;\s*/, $line;
-    @fields = map { s/^\s+|\s+$//gr } @fields; #trim whitespace
+    my @fields = split_line($line);
 
     unless ($fields[0] =~ /^\d{4}-\d{2}-\d{2}$/) {
         return "Invalid date format";
@@ -102,4 +167,16 @@ sub validate_expense {
     }
 
     return undef;
+}
+
+sub report_errors {
+    my (@errors) = @_;
+    foreach my $error (@errors) {
+        say "Error on line $error->{line}: $error->{message}";
+    }
+}
+
+sub split_line {
+    my $line = shift;
+    return map { s/^\s+|\s+$//gr } split /;\s*/, $line;
 }
