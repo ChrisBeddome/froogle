@@ -2,7 +2,8 @@ use strict;
 use warnings;
 use feature 'say';
 
-my $data_file_path = "./test/data.txt";
+# my $data_file_path = "./test/data.txt";
+my $data_file_path = "../../../finance/spending.txt";
 
 open(my $fh, '<', $data_file_path) or die "Error when attempting to open file $data_file_path:\n$!";
 
@@ -49,7 +50,7 @@ sub validate_line {
         return "Invalid date format";
     }
 
-    unless ($fields[2] =~ /^\d+(\.\d+)?$/ && $fields[2] > 0) {
+    unless ($fields[2] =~ /^\d+(\.\d+)?$/ && $fields[2] >= 0) {
         return "Third field should be a positive number";
     }
 
