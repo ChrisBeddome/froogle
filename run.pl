@@ -2,7 +2,8 @@ use strict;
 use warnings;
 use feature 'say';
 
-use constant DATA_FILE_PATH => "./test/data.txt";
+# use constant DATA_FILE_PATH => "./test/data.txt";
+use constant DATA_FILE_PATH => "../../../finance/spending.txt";
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 use constant CATEGORY_CODES => qw(GRC DNG ENT HOS SRV HOM TRP PET CLT HLT GFT SLF MSC INC SAV ASS);
 use constant COMMAND_MAPPING => {
@@ -57,14 +58,21 @@ sub overview {
         }
 
         if (defined $transaction->{owe_zz} && !$transaction->{settled}) {
-            $owe_zz += $transaction->{owe_zz};
+            my $amount_owed = $transaction->{owe_zz};
+            if ($amount_owed eq "HALF") {
+                $owe_zz += $transaction->{amount};
+            } elsif ($amount_owed eq "-HALF") {
+                $owe_zz -= $transaction->{amount};
+            } else {
+                $owe_zz += $amount_owed;
+            }
         }
-
     });
 
-    say "Total Spending: ${spending}";
-    say "Total Income:   ${income}";
-    say "Chris Owes ZZ:  ${owe_zz}";
+    say "Total Spending: $spending";
+    say "Total Income:   $income";
+    my $who_owe_who = $owe_zz >= 0 ? "Chris Owes ZZ" : "ZZ Owes Chris";
+    say "$who_owe_who:  " . abs($owe_zz);
 }
 
 sub validate_file {
@@ -154,8 +162,8 @@ sub validate_expense {
 
     return undef if @fields <= 6;
 
-    if ($fields[6] ne '' && $fields[6] !~ /^-?\d+(\.\d+)?$/) {
-        return "Seventh field should be a number or empty";
+    if ($fields[6] ne '' && $fields[6] !~ /^-?\d+(\.\d+)?$/ && $fields[6] ne 'HALF' && $fields[6] ne '-HALF') {
+        return "Seventh field should be a number, 'HALF', '-HALF' or empty";
     }
 
     return "Eighth field must not be empty if seventh field is present" if @fields < 8;
