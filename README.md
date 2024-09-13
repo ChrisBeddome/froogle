@@ -41,7 +41,7 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 - **HLT** - Health (includes self care)
 - **GFT** - Gifts
 - **SLF** - Self Improvement (education, gym)
-- **TOY** - toys, hobbies (music gear, headphones, frisbee etc)
+- **TOY** - Toys, hobbies (music gear, headphones, frisbee etc)
 - **MSC** - Miscellaneous
 - **INC** - Income
 - **SAV** - Savings

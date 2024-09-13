@@ -1,13 +1,30 @@
 use warnings;
 use feature 'say';
 use List::Util qw(sum);
-
-# use constant DATA_FILE_PATH => "./test/data.txt";
+use constant CATEGORY_CODES => {
+    'GRC' => 'Groceries',
+    'DNG' => 'Dining',
+    'ENT' => 'Entertainment/Leisure',
+    'HOS' => 'Housing',
+    'SRV' => 'Services',
+    'HOM' => 'Home Improvement/household supplies/decor',
+    'TRP' => 'Transportation',
+    'PET' => 'Pets',
+    'CLT' => 'Clothing',
+    'HLT' => 'Health',
+    'GFT' => 'Gifts',
+    'SLF' => 'Self Improvement',
+    'TOY' => 'Toys/Hobbies',
+    'MSC' => 'Miscellaneous',
+    'INC' => 'Income',
+    'SAV' => 'Savings',
+    'ASS' => 'Assets'
+};
 use constant DATA_FILE_PATH => "../../../finance/spending.txt";
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
-use constant CATEGORY_CODES => qw(GRC DNG ENT HOS SRV HOM TRP PET CLT HLT GFT SLF MSC INC SAV ASS);
 use constant COMMAND_MAPPING => {
-    "overview" => \&overview
+    "overview" => \&overview,
+    "zz" => \&zz_owe
 };
 
 main();
@@ -56,35 +73,46 @@ sub overview {
         } else {
             $spending{$transaction->{necessity}} += $transaction->{amount};
         }
-
-        if (defined $transaction->{owe_zz} && !$transaction->{settled}) {
-            my $amount_owed = $transaction->{owe_zz};
-            if ($amount_owed eq "HALF") {
-                $owe_zz += $transaction->{amount};
-            } elsif ($amount_owed eq "-HALF") {
-                $owe_zz -= $transaction->{amount};
-            } else {
-                $owe_zz += $amount_owed;
-            }
-        }
+        $owe_zz += amount_owed_for_transaction($transaction);
     });
 
-    $income = format_currency($income);
-    $necessary = format_currency($spending{'3'});
-    $unnecessary = format_currency($spending{'2'});
-    $frivilous = format_currency($spending{'1'});
+    $income = format_currency($income, 10);
+    $necessary = format_currency($spending{'3'}, 10);
+    $unnecessary = format_currency($spending{'2'}, 10);
+    $frivilous = format_currency($spending{'1'}, 10);
 
     say "";
     say "Total Income:                   $income";
-    say "=========";
+    say "";
     say "Necessary spending:             $necessary";
     say "Unnecessary spending:           $unnecessary";
     say "Frivolous spending:             $frivilous";
-    say "Total Spending:                 " . format_currency(sum(values %spending));
-    say "=========";
-    my $who_owe_who = $owe_zz >= 0 ? "Chris Owes ZZ" : "ZZ Owes Chris";
-    say "$who_owe_who:                  " . format_currency(abs($owe_zz));
+    say "Total Spending:                 " . format_currency(sum(values %spending), 10);
     say "";
+    say who_owe_who_text($owe_zz) . ":                  " . format_currency(abs($owe_zz), 10);
+    say "";
+}
+
+sub zz_owe {
+    my $owe_zz = 0;
+    my @need_settling = ();
+
+    process(sub {
+        my $transaction = shift;
+        if (is_unsettled($transaction)) {
+            push(@need_settling, $transaction); 
+            $owe_zz += amount_owed_for_transaction($transaction);
+        }
+    });
+
+    say "";
+    for my $i (0 .. $#need_settling) {
+        say format_debt_line($need_settling[$i]);
+    }
+    say "                                                                ==============";
+    say who_owe_who_text($owe_zz) . ":                                                      " . format_currency(abs($owe_zz), 10);
+    say "";
+
 }
 
 sub validate_file {
@@ -161,8 +189,7 @@ sub validate_expense {
 
     return "Invalid number of fields" unless @fields >= 6 && @fields <= 8;
 
-    my %valid_codes = map { $_ => 1 } CATEGORY_CODES;
-    unless (exists $valid_codes{$fields[3]}) {
+    unless (exists CATEGORY_CODES->{$fields[3]}) {
         return "Invalid category code";
     }
 
@@ -190,6 +217,31 @@ sub validate_expense {
     return undef;
 }
 
+sub amount_owed_for_transaction {
+    my $transaction = shift;
+    if (is_unsettled($transaction)) {
+        my $owe_zz = 0;
+        my $amount_owed = $transaction->{owe_zz};
+        if ($amount_owed eq "HALF") {
+            $owe_zz += $transaction->{amount};
+        } elsif ($amount_owed eq "-HALF") {
+            $owe_zz -= $transaction->{amount};
+        } else {
+            $owe_zz += $amount_owed;
+        }
+        return $owe_zz;
+    }
+    return 0;
+}
+
+sub is_unsettled {
+    my $transaction = shift;
+    if (defined $transaction->{owe_zz} && !$transaction->{settled}) {
+        return 1;
+    }
+    return 0;
+}
+
 sub report_errors {
     my (@errors) = @_;
     foreach my $error (@errors) {
@@ -203,7 +255,35 @@ sub split_line {
 }
 
 sub format_currency {
-    my $dollars = shift;
-    return "\$" . sprintf("%.2f", $dollars);
+    my ($dollars, $width) = @_;
+
+    my $formatted_amount = sprintf("%.2f", $dollars);
+
+    if (defined $width) {
+        my $total_length = $width - 1;  # Subtract 1 for the dollar sign
+        return sprintf("\$%${total_length}s", $formatted_amount);
+    }
+
+    return "\$" . $formatted_amount;
 }
 
+sub who_owe_who_text {
+    my $amount = shift;
+    return $amount >= 0 ? "Chris Owes ZZ" : "ZZ Owes Chris";
+}
+
+sub format_debt_line {
+    my $transaction = shift;
+    my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
+    $amount_owed = amount_owed_for_transaction($transaction);
+    return who_owe_who_text($amount_owed) . "         " . truncate_or_pad($desc, 30)  . "             " . format_currency(abs($amount_owed), 10);
+}
+
+sub truncate_or_pad {
+    my ($input, $length, $pad_left) = @_;
+     if (length($input) > $length) {
+        $input = substr($input, 0, $length) . '...';
+    }
+    $length += 3; #for ellipsis
+    return $pad_left ? sprintf("%${length}s", $input) : sprintf("%-${length}s", $input);
+}
