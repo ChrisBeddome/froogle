@@ -1,6 +1,6 @@
-use strict;
 use warnings;
 use feature 'say';
+use List::Util qw(sum);
 
 # use constant DATA_FILE_PATH => "./test/data.txt";
 use constant DATA_FILE_PATH => "../../../finance/spending.txt";
@@ -45,7 +45,7 @@ sub process {
 }
 
 sub overview {
-    my $spending = 0;
+    my %spending = ("1" => 0, "2" => 0, "3" => 0);
     my $income = 0;
     my $owe_zz = 0;
 
@@ -54,7 +54,7 @@ sub overview {
         if ($transaction->{type} eq "IN") { 
             $income += $transaction->{amount};
         } else {
-            $spending += $transaction->{amount};
+            $spending{$transaction->{necessity}} += $transaction->{amount};
         }
 
         if (defined $transaction->{owe_zz} && !$transaction->{settled}) {
@@ -69,10 +69,22 @@ sub overview {
         }
     });
 
-    say "Total Spending: $spending";
-    say "Total Income:   $income";
+    $income = format_currency($income);
+    $necessary = format_currency($spending{'3'});
+    $unnecessary = format_currency($spending{'2'});
+    $frivilous = format_currency($spending{'1'});
+
+    say "";
+    say "Total Income:                   $income";
+    say "=========";
+    say "Necessary spending:             $necessary";
+    say "Unnecessary spending:           $unnecessary";
+    say "Frivolous spending:             $frivilous";
+    say "Total Spending:                 " . format_currency(sum(values %spending));
+    say "=========";
     my $who_owe_who = $owe_zz >= 0 ? "Chris Owes ZZ" : "ZZ Owes Chris";
-    say "$who_owe_who:  " . abs($owe_zz);
+    say "$who_owe_who:                  " . format_currency(abs($owe_zz));
+    say "";
 }
 
 sub validate_file {
@@ -189,3 +201,9 @@ sub split_line {
     my $line = shift;
     return map { s/^\s+|\s+$//gr } split /;\s*/, $line;
 }
+
+sub format_currency {
+    my $dollars = shift;
+    return "\$" . sprintf("%.2f", $dollars);
+}
+
