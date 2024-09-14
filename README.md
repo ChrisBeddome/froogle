@@ -1,6 +1,10 @@
 # froogle
 Analytics for personal finances
 
+## Usage ##
+
+set ENV variable BUDGET_DATA_FILE_PATH to a text file that adheres to the below format
+
 ## Format
 
 **DATE** ; **IN/OUT** ; **AMOUNT** ; **CATEGORY** ; **DETAILS** ; **NECESSITY** ; **OWE ZZ** ; **SETTLED**

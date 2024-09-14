@@ -1,6 +1,7 @@
 use warnings;
 use feature 'say';
 use List::Util qw(sum);
+
 use constant CATEGORY_CODES => {
     'GRC' => 'Groceries',
     'DNG' => 'Dining',
@@ -20,7 +21,7 @@ use constant CATEGORY_CODES => {
     'SAV' => 'Savings',
     'ASS' => 'Assets'
 };
-use constant DATA_FILE_PATH => "../../../finance/spending.txt";
+use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 use constant COMMAND_MAPPING => {
     "overview" => \&overview,
