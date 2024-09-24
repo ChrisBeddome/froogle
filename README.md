@@ -5,6 +5,8 @@ Analytics for personal finances
 
 set ENV variable `BUDGET_DATA_FILE_PATH` to a text file that adheres to the below format
 
+run `froogle help` to view options
+
 ## Format
 
 **DATE** ; **IN/OUT** ; **AMOUNT** ; **CATEGORY** ; **DETAILS** ; **NECESSITY** ; **OWE ZZ** ; **SETTLED**

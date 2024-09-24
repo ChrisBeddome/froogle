@@ -1,6 +1,7 @@
 use warnings;
 use feature 'say';
 use List::Util qw(sum);
+use Getopt::Long;
 
 use constant CATEGORY_CODES => {
     'GRC' => 'Groceries',
@@ -24,6 +25,7 @@ use constant CATEGORY_CODES => {
 use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 use constant COMMAND_MAPPING => {
+    "help" => \&help,
     "overview" => \&overview,
     "zz" => \&zz_owe
 };
@@ -31,11 +33,33 @@ use constant COMMAND_MAPPING => {
 main();
 
 sub main {
-    my $command = $ARGV[0] || "overview";
-    my $arg = $ARGV[1];
+    my $command = get_command();
+    my %options = parse_options();
     my $func = COMMAND_MAPPING->{$command} ;
     die "Command not recognized: $command" if !defined $func;
     $func->();
+}
+
+sub get_command {
+    my $command = 'overview'; #default
+    my $first_arg = shift @ARGV;
+
+    # If the first argument is not an option (doesn't start with '-'), treat it as a command
+    if (defined $first_arg && $first_arg !~ /^-/) {
+        $command = $first_arg;
+    } else {
+        unshift @ARGV, $first_arg if defined $first_arg;  # Push back the first arg if not a command
+    }
+    return $command;
+}
+
+sub parse_options {
+    my %options;
+    GetOptions(
+        'verbose|v'  => \$options{verbose},
+        'year|y=s'   => \$options{year}
+    ) or die "Error in command line arguments";
+    return %options;
 }
 
 sub process {
@@ -60,6 +84,10 @@ sub process {
     foreach my $transaction (@$transactions) {
         $execution_block->($transaction);
     }
+}
+
+sub help {
+    say "Usage: TODO";
 }
 
 sub overview {
