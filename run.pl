@@ -28,8 +28,9 @@ use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz s
 use constant COMMAND_MAPPING => {
     "help" => \&help,
     "overview" => \&overview,
-    "zz" => \&zz_owe,
-    "details" => \&details
+    "list" => \&list,
+    "details" => \&details,
+    "zz" => \&zz_owe
 };
 
 main();
@@ -87,7 +88,6 @@ sub help {
 sub overview {
     my %spending = ("1" => 0, "2" => 0, "3" => 0);
     my $income = 0;
-    my $owe_zz = 0;
 
     my @transactions = get_transactions;
 
@@ -98,7 +98,6 @@ sub overview {
         } else {
             $spending{$transaction->{necessity}} += $transaction->{amount};
         }
-        $owe_zz += amount_owed_for_transaction($transaction);
     }
 
     $income = format_currency($income, 10);
@@ -114,17 +113,27 @@ sub overview {
     say "Frivolous spending:             $frivilous";
     say "Total Spending:                 " . format_currency(sum(values %spending), 10);
     say "";
-    say who_owe_who_text($owe_zz) . ":                  " . format_currency(abs($owe_zz), 10);
+}
+
+sub list {
+    my @transactions = get_transactions;
+
+    say "";
+    foreach (@transactions) {
+        my $transaction = $_;
+        print_transaction_simple($transaction);
+    }
     say "";
 }
 
 sub details {
     my @transactions = get_transactions;
 
-    say "";
     foreach (@transactions) {
         my $transaction = $_;
-        print_transaction_details($transaction);
+        say "";
+        print_transaction_detailed($transaction);
+        say "";
     }
     say "";
 }
@@ -151,10 +160,21 @@ sub zz_owe {
     say "";
 }
 
-sub print_transaction_details {
+sub print_transaction_simple {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
-    say "$transaction->{amount} on $transaction->{date} for $desc";
+    my $amount = format_currency($transaction->{amount}, 10);
+    say "$amount on $transaction->{date} for $desc";
+}
+
+sub print_transaction_detailed {
+    my $transaction = shift;
+    say "Date:           $transaction->{date}";
+    say "Type:           $transaction->{type}";
+    say "Amount:         " . format_currency($transaction->{amount});
+    say "Category:       $transaction->{category}";
+    say "Description:    $transaction->{desc}" if defined $transaction->{desc};
+    say "Necessity:      " . format_necessity($transaction->{necessity});
 }
 
 sub validate_file {
@@ -328,4 +348,10 @@ sub truncate_or_pad {
     }
     $length += 3; #for ellipsis
     return $pad_left ? sprintf("%${length}s", $input) : sprintf("%-${length}s", $input);
+}
+
+sub format_necessity {
+    my $necessity_num = shift;
+    my %necessary = ("1" => "Frivolous", "2" => "Unnecessary", "3" => "Necessary");
+    return $necessary{$necessity_num};
 }
