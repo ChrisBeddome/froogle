@@ -153,6 +153,7 @@ sub help {
     say "   list:      Lists all transactions for the specified date range";
     say "   details:   Lists all transactions for the specified date range with additional details";
     say "   zz:        Displays a summary of money owed";
+    say "   cats:      Displays a summary of spending per category";
     say "";
     say "Options: ";
     say "";
@@ -178,7 +179,6 @@ sub help {
     say "   list all details of transactions for the current month that are 'necessary': ";
     say "       => froogle details -n 3";
     say "";
-
 }
 
 sub overview {
@@ -196,7 +196,7 @@ sub overview {
         }
     }
 
-    $income = format_currency($income, 10);
+    $income_str = format_currency($income, 10);
     $necessary = format_currency($spending{'3'}, 10);
     $unnecessary = format_currency($spending{'2'}, 10);
     $frivilous = format_currency($spending{'1'}, 10);
@@ -205,12 +205,14 @@ sub overview {
     say "";
     say formatted_date_range_text();
     say "";
-    say "Total Income:                   $income";
+    say "Total Income:                   $income_str";
     say "";
     say "Necessary spending:             $necessary";
     say "Unnecessary spending:           $unnecessary";
     say "Frivolous spending:             $frivilous";
     say "Total Spending:                 " . format_currency(sum(values %spending), 10);
+    say "";
+    say "Income minus spending:          " . format_currency($income - sum(values %spending), 10);
     say "";
 }
 
@@ -258,7 +260,8 @@ sub categories {
     say formatted_date_range_text();
     say "";
 
-    for my $key (sort keys %spending_per_categories) {
+    my @sorted_keys = sort { $spending_per_categories{$a} <=> $spending_per_categories{$b} } keys %spending_per_categories;
+    for my $key (@sorted_keys) {
         my $cat_text = truncate_or_pad(CATEGORY_CODES->{$key}, 30);
         say $cat_text . format_currency($spending_per_categories{$key}, 10);
     }
@@ -293,14 +296,12 @@ sub print_transaction_simple {
     my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
     my $amount = format_currency($transaction->{amount}, 10);
     my $type = $transaction->{type};
-    $type = "IN " if ($type eq "IN");
-    say "$amount $type on $transaction->{date} for $desc";
+    say "$amount on $transaction->{date} for $desc";
 }
 
 sub print_transaction_detailed {
     my $transaction = shift;
     say "Date:           $transaction->{date}";
-    say "Type:           $transaction->{type}";
     say "Amount:         " . format_currency($transaction->{amount});
     say "Category:       $transaction->{category}" unless $transaction->{type} eq "IN";
     say "Description:    $transaction->{desc}" if defined $transaction->{desc};
@@ -493,7 +494,7 @@ sub filter_transactions {
     foreach (@transactions) {
         my $transaction = $_;
         if ($transaction->{type} eq "IN") {
-            next if $options{command} eq "list" || $options{command} eq "details" || $options{command} eq "zz";
+            next if $options{command} eq "list" || $options{command} eq "details" || $options{command} eq "zz" || $options{command} eq "cats";
         }
         if (defined $options{from} && defined $options{to}) {
             next unless is_date_in_range($transaction->{date}, $options{from}, $options{to});
