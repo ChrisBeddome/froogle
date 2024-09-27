@@ -9,7 +9,7 @@ use constant CATEGORY_CODES => {
     'ENT' => 'Entertainment/Leisure',
     'HOS' => 'Housing',
     'SRV' => 'Services',
-    'HOM' => 'Home Improvement/household supplies/decor',
+    'HOM' => 'Home',
     'TRP' => 'Transportation',
     'PET' => 'Pets',
     'CLT' => 'Clothing',
@@ -22,14 +22,15 @@ use constant CATEGORY_CODES => {
     'SAV' => 'Savings',
     'ASS' => 'Assets'
 };
-# use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
-use constant DATA_FILE_PATH => './test/data.txt';
+use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
+# use constant DATA_FILE_PATH => './test/data.txt';
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 use constant COMMAND_MAPPING => {
     "help" => \&help,
     "overview" => \&overview,
     "list" => \&list,
     "details" => \&details,
+    "cats" => \&categories,
     "zz" => \&zz_owe
 };
 
@@ -84,7 +85,6 @@ sub get_command {
     return $command;
 }
 
-
 sub validate_options {
     my (%options) = @_;
     my $command = $options{command};
@@ -94,7 +94,8 @@ sub validate_options {
         'overview' => ['command', 'from', 'to'],
         'list' => ['command', 'from', 'to', 'necessity', 'category'],
         'details' => ['command', 'from', 'to', 'necessity', 'category'],
-        'zz' => ['command']
+        'zz' => ['command'],
+        'cats' => ['command', 'from', 'to']
     );
 
     for my $option (keys %options) {
@@ -239,6 +240,29 @@ sub details {
         print_transaction_detailed($transaction);
         say "";
     }
+    say "";
+}
+
+sub categories {
+    my %spending_per_categories;
+    my @transactions = get_transactions;
+    for my $key (keys %{CATEGORY_CODES()}) {
+        $spending_per_categories{$key} = 0;
+    }
+    for my $transaction (@transactions) {
+        if ($transaction->{type} eq "OUT") {
+            $spending_per_categories{$transaction->{category}} += $transaction->{amount};
+        }
+    }
+    say "";
+    say formatted_date_range_text();
+    say "";
+
+    for my $key (sort keys %spending_per_categories) {
+        my $cat_text = truncate_or_pad(CATEGORY_CODES->{$key}, 30);
+        say $cat_text . format_currency($spending_per_categories{$key}, 10);
+    }
+
     say "";
 }
 
