@@ -57,7 +57,8 @@ sub parse_options {
     GetOptions(
         'from|f=s'   => \$options{from},
         'to|t=s'   => \$options{to},
-        'necessity|n=i'   => \$options{necessity}
+        'necessity|n=i'   => \$options{necessity},
+        'category|c=s'   => \$options{category}
     ) or die "Error in command line arguments";
     return %options;
 }
@@ -65,8 +66,8 @@ sub parse_options {
 sub set_defaults {
     my %options = @_;
     my $command = $options{command};
-    $options{to} = get_today() unless defined $options{to} || $command eq "zz";
-    $options{from} = get_start_of_month() unless defined $options{from} || $command eq "zz";
+    $options{to} = get_today() unless defined $options{to} || $command eq "zz" || $command eq "help";
+    $options{from} = get_start_of_month() unless defined $options{from} || $command eq "zz" || $command eq "help";
     return %options;
 }
 
@@ -89,9 +90,10 @@ sub validate_options {
     my $command = $options{command};
 
     my %applicable_options = (
+        'help'=> ['command'],
         'overview' => ['command', 'from', 'to'],
-        'list' => ['command', 'from', 'to', 'necessity'],
-        'details' => ['command', 'from', 'to', 'necessity'],
+        'list' => ['command', 'from', 'to', 'necessity', 'category'],
+        'details' => ['command', 'from', 'to', 'necessity', 'category'],
         'zz' => ['command']
     );
 
@@ -118,6 +120,10 @@ sub validate_options {
     if (defined $options{necessity} && ($options{necessity} < 1 || $options{necessity} > 3)) {
         die "Necessity must be 1, 2, or 3";
     }
+
+    if (defined $options{category} && !exists CATEGORY_CODES->{$options{category}}) {
+        die "Invalid category code";
+    }
 }
 
 sub get_transactions {
@@ -139,7 +145,39 @@ sub get_transactions {
 }
 
 sub help {
-    say "Usage: TODO";
+    say "";
+    say "Commands: ";
+    say "";
+    say "   overview:  Displays a summary of income and spending for the specified date range";
+    say "   list:      Lists all transactions for the specified date range";
+    say "   details:   Lists all transactions for the specified date range with additional details";
+    say "   zz:        Displays a summary of money owed";
+    say "";
+    say "Options: ";
+    say "";
+    say "   -f, --from:      Start date for the date range (default: start of the current month)";
+    say "   -t, --to:        End date for the date range (default: today)";
+    say "   -n, --necessity: Filter transactions by necessity (1 = frivolous, 2 = unnecessary, 3 = necessary)";
+    say "   -c, --category:  Filter transactions by category code";
+    say "";
+    say "Category codes: ";
+    say "";
+    for my $key (sort keys %{CATEGORY_CODES()}) {
+        say "   $key: " . CATEGORY_CODES->{$key};
+    }
+    say "";
+    say "Examples: ";
+    say "";
+    say "   list all transactions for the month of January 2021: ";
+    say "       => froogle list -f 2021-01-01 -t 2021-01-31";
+    say "";
+    say "   list all transactions for the month of January 2021 in the 'Groceries' category: ";
+    say "       => froogle list -f 2021-01-01 -t 2021-01-31 -c GRC";
+    say "";
+    say "   list all details of transactions for the current month that are 'necessary': ";
+    say "       => froogle details -n 3";
+    say "";
+
 }
 
 sub overview {
@@ -179,6 +217,9 @@ sub list {
     my @transactions = get_transactions;
 
     say "";
+    say formatted_date_range_text();
+    say "";
+
     foreach (@transactions) {
         my $transaction = $_;
         print_transaction_simple($transaction);
@@ -188,6 +229,9 @@ sub list {
 
 sub details {
     my @transactions = get_transactions;
+
+    say "";
+    say formatted_date_range_text();
 
     foreach (@transactions) {
         my $transaction = $_;
@@ -424,11 +468,17 @@ sub filter_transactions {
 
     foreach (@transactions) {
         my $transaction = $_;
+        if ($transaction->{type} eq "IN") {
+            next if $options{command} eq "list" || $options{command} eq "details" || $options{command} eq "zz";
+        }
         if (defined $options{from} && defined $options{to}) {
             next unless is_date_in_range($transaction->{date}, $options{from}, $options{to});
         }
         if (defined $options{necessity}) {
             next unless $transaction->{necessity} == $options{necessity};
+        }
+        if (defined $options{category}) {
+            next unless $transaction->{category} eq $options{category};
         }
         push(@filtered_transactions, $transaction);
     }
