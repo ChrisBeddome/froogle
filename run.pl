@@ -33,14 +33,41 @@ use constant COMMAND_MAPPING => {
     "zz" => \&zz_owe
 };
 
+my %options;
+
 main();
 
 sub main {
-    my $command = get_command();
-    my %options = parse_options();
-    my $func = COMMAND_MAPPING->{$command} ;
-    die "Command not recognized: $command" if !defined $func;
+    %options = get_options();
+    my $func = COMMAND_MAPPING->{$options{command}};
+    die "Command not recognized: $options{command}" if !defined $func;
     $func->();
+}
+
+sub get_options {
+    my %local_options = parse_options();
+    %local_options = set_defaults(%local_options);
+    validate_options(%local_options);
+    return %local_options;
+}
+
+sub parse_options {
+    my %options;
+    $options{command} = get_command();
+    GetOptions(
+        'from|f=s'   => \$options{from},
+        'to|t=s'   => \$options{to},
+        'necessity|n=i'   => \$options{necessity}
+    ) or die "Error in command line arguments";
+    return %options;
+}
+
+sub set_defaults {
+    my %options = @_;
+    my $command = $options{command};
+    $options{to} = get_today() unless defined $options{to} || $command eq "zz";
+    $options{from} = get_start_of_month() unless defined $options{from} || $command eq "zz";
+    return %options;
 }
 
 sub get_command {
@@ -56,13 +83,41 @@ sub get_command {
     return $command;
 }
 
-sub parse_options {
-    my %options;
-    GetOptions(
-        'verbose|v'  => \$options{verbose},
-        'year|y=s'   => \$options{year}
-    ) or die "Error in command line arguments";
-    return %options;
+
+sub validate_options {
+    my (%options) = @_;
+    my $command = $options{command};
+
+    my %applicable_options = (
+        'overview' => ['command', 'from', 'to'],
+        'list' => ['command', 'from', 'to', 'necessity'],
+        'details' => ['command', 'from', 'to', 'necessity'],
+        'zz' => ['command']
+    );
+
+    for my $option (keys %options) {
+        if (defined $options{$option} && !grep { $_ eq $option } @{$applicable_options{$command}}) {
+            die "Option '$option' not applicable to '${command}' command";
+        }
+    }
+
+    if (defined $options{from} && $options{to}) {
+        if ($options{from} gt $options{to}) {
+            die "From date must be before to date";
+        }   
+    }
+
+    if (defined $options{from} && $options{from} !~ /^\d{4}-\d{2}-\d{2}$/) {
+        die "Invalid date format for 'from' option";
+    }
+
+    if (defined $options{to} && $options{to} !~ /^\d{4}-\d{2}-\d{2}$/) {
+        die "Invalid date format for 'to' option";
+    }
+
+    if (defined $options{necessity} && ($options{necessity} < 1 || $options{necessity} > 3)) {
+        die "Necessity must be 1, 2, or 3";
+    }
 }
 
 sub get_transactions {
@@ -76,6 +131,8 @@ sub get_transactions {
     }
 
     my @transactions = parse_file($fh);
+    @transactions = filter_transactions(@transactions);
+
     close($fh);
 
     return @transactions;
@@ -105,6 +162,9 @@ sub overview {
     $unnecessary = format_currency($spending{'2'}, 10);
     $frivilous = format_currency($spending{'1'}, 10);
 
+
+    say "";
+    say formatted_date_range_text();
     say "";
     say "Total Income:                   $income";
     say "";
@@ -164,7 +224,9 @@ sub print_transaction_simple {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
     my $amount = format_currency($transaction->{amount}, 10);
-    say "$amount on $transaction->{date} for $desc";
+    my $type = $transaction->{type};
+    $type = "IN " if ($type eq "IN");
+    say "$amount $type on $transaction->{date} for $desc";
 }
 
 sub print_transaction_detailed {
@@ -172,9 +234,9 @@ sub print_transaction_detailed {
     say "Date:           $transaction->{date}";
     say "Type:           $transaction->{type}";
     say "Amount:         " . format_currency($transaction->{amount});
-    say "Category:       $transaction->{category}";
+    say "Category:       $transaction->{category}" unless $transaction->{type} eq "IN";
     say "Description:    $transaction->{desc}" if defined $transaction->{desc};
-    say "Necessity:      " . format_necessity($transaction->{necessity});
+    say "Necessity:      " . format_necessity($transaction->{necessity}) unless $transaction->{type} eq "IN";
 }
 
 sub validate_file {
@@ -354,4 +416,61 @@ sub format_necessity {
     my $necessity_num = shift;
     my %necessary = ("1" => "Frivolous", "2" => "Unnecessary", "3" => "Necessary");
     return $necessary{$necessity_num};
+}
+
+sub filter_transactions {
+    my @transactions = @_;
+    my @filtered_transactions = ();
+
+    foreach (@transactions) {
+        my $transaction = $_;
+        if (defined $options{from} && defined $options{to}) {
+            next unless is_date_in_range($transaction->{date}, $options{from}, $options{to});
+        }
+        if (defined $options{necessity}) {
+            next unless $transaction->{necessity} == $options{necessity};
+        }
+        push(@filtered_transactions, $transaction);
+    }
+
+    return @filtered_transactions;
+}
+
+sub is_date_in_range {
+    my ($date, $from, $to) = @_;
+
+    # Remove the dashes
+    $date =~ s/-//g;
+    $from =~ s/-//g;
+    $to =~ s/-//g;
+
+    if ($date >= $from && $date <= $to) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+sub get_today {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $year += 1900;
+    $mon += 1;
+    return sprintf("%04d-%02d-%02d", $year, $mon, $mday);
+}
+
+sub get_start_of_month {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $year += 1900;
+    $mon += 1;
+    return sprintf("%04d-%02d-01", $year, $mon);
+}
+
+sub format_date {
+    my $date = shift;
+    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+    return $months[substr($date, 5, 2) - 1] . " " . substr($date, 8, 2) . " " . substr($date, 0, 4);
+}
+
+sub formatted_date_range_text {
+    return format_date($options{from}) . " - " . format_date($options{to});
 }
