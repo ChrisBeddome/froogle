@@ -22,12 +22,14 @@ use constant CATEGORY_CODES => {
     'SAV' => 'Savings',
     'ASS' => 'Assets'
 };
-use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
+# use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
+use constant DATA_FILE_PATH => './test/data.txt';
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 use constant COMMAND_MAPPING => {
     "help" => \&help,
     "overview" => \&overview,
-    "zz" => \&zz_owe
+    "zz" => \&zz_owe,
+    "details" => \&details
 };
 
 main();
@@ -62,13 +64,7 @@ sub parse_options {
     return %options;
 }
 
-sub process {
-    my $execution_block = shift;
-
-    unless (ref $execution_block eq 'CODE') {
-        die "The first argument must be a code reference.";
-    }
-
+sub get_transactions {
     open(my $fh, '<', DATA_FILE_PATH) or die "Error when attempting to open file" .  DATA_FILE_PATH . ":\n$!";
 
     my @errors = validate_file($fh);
@@ -78,12 +74,10 @@ sub process {
         die "Data contains errors; Exiting."
     }
 
-    my $transactions = parse_file($fh);
+    my @transactions = parse_file($fh);
     close($fh);
 
-    foreach my $transaction (@$transactions) {
-        $execution_block->($transaction);
-    }
+    return @transactions;
 }
 
 sub help {
@@ -95,15 +89,17 @@ sub overview {
     my $income = 0;
     my $owe_zz = 0;
 
-    process(sub {
-        my $transaction = shift;
+    my @transactions = get_transactions;
+
+    foreach (@transactions) {
+        my $transaction = $_;
         if ($transaction->{type} eq "IN") { 
             $income += $transaction->{amount};
         } else {
             $spending{$transaction->{necessity}} += $transaction->{amount};
         }
         $owe_zz += amount_owed_for_transaction($transaction);
-    });
+    }
 
     $income = format_currency($income, 10);
     $necessary = format_currency($spending{'3'}, 10);
@@ -122,17 +118,29 @@ sub overview {
     say "";
 }
 
+sub details {
+    my @transactions = get_transactions;
+
+    say "";
+    foreach (@transactions) {
+        my $transaction = $_;
+        print_transaction_details($transaction);
+    }
+    say "";
+}
+
 sub zz_owe {
     my $owe_zz = 0;
     my @need_settling = ();
 
-    process(sub {
-        my $transaction = shift;
+    my @transactions = get_transactions;
+    foreach (@transactions) {
+        my $transaction = $_;
         if (is_unsettled($transaction)) {
             push(@need_settling, $transaction); 
             $owe_zz += amount_owed_for_transaction($transaction);
         }
-    });
+    }
 
     say "";
     for my $i (0 .. $#need_settling) {
@@ -141,7 +149,12 @@ sub zz_owe {
     say "                                                                ==============";
     say who_owe_who_text($owe_zz) . ":                                                      " . format_currency(abs($owe_zz), 10);
     say "";
+}
 
+sub print_transaction_details {
+    my $transaction = shift;
+    my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
+    say "$transaction->{amount} on $transaction->{date} for $desc";
 }
 
 sub validate_file {
@@ -182,7 +195,7 @@ sub parse_file {
         push @records, \%record;
     }
 
-    return \@records;
+    return @records;
 }
 
 sub validate_line {

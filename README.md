@@ -7,7 +7,7 @@ set ENV variable `BUDGET_DATA_FILE_PATH` to a text file that adheres to the belo
 
 run `froogle help` to view options
 
-## Format
+## Data Format
 
 **DATE** ; **IN/OUT** ; **AMOUNT** ; **CATEGORY** ; **DETAILS** ; **NECESSITY** ; **OWE ZZ** ; **SETTLED**
 

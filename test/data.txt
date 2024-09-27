@@ -59,11 +59,80 @@
 2024-09-29 ; OUT ; 55.00 ; SRV ; Internet bill ; 3 ; -55.00 ; 0  
 2024-09-30 ; OUT ; 120.00 ; HOS ; Rent ; 3 ; -120.00 ; 0  
 2024-09-30 ; OUT ; 40.00 ; PET ; Dog grooming ; 3 ; -40.00 ; 0  
-2024-09-01 ; OUT ; 50.00 ; GRC ; Groceries ; 3 ; -50.00 ; 0  
-2024-09-01 ; OUT ; 12.00 ; DNG ; Snack ; 2 ; -12.00 ; 1  
-2024-09-02 ; IN ; 5000 ; ; Salary  
-2024-09-02 ; OUT ; 30.00 ; PET ; Pet food ; 3 ; -30.00 ; 0  
-2024-09-03 ; OUT ; 45.00 ; HOS ; Utilities ; 3 ; -45.00 ; 0  
-2024-09-03 ; OUT ; 25.00 ; MSC ; Personal care ; 2 ; -25.00 ; 1
-2024-09-04 ; OUT ; 80.00 ; GRC ; Weekly shopping ; 3 ; -80.00 ; 0  
-2024-09-04 ; OUT ; 15.00 ; CLT ; Accessories ; 2 ; -15.00 ; 1
+2024-10-01 ; OUT ; 50.00 ; GRC ; Groceries ; 3 ; -50.00 ; 0  
+2024-10-01 ; OUT ; 12.00 ; DNG ; Snack ; 2 ; -12.00 ; 1  
+2024-10-02 ; IN ; 5000 ; ; Salary  
+2024-10-02 ; OUT ; 30.00 ; PET ; Pet food ; 3 ; -30.00 ; 0  
+2024-10-03 ; OUT ; 45.00 ; HOS ; Utilities ; 3 ; -45.00 ; 0  
+2024-10-03 ; OUT ; 25.00 ; MSC ; Personal care ; 2 ; -25.00 ; 1
+2024-10-04 ; OUT ; 80.00 ; GRC ; Weekly shopping ; 3 ; -80.00 ; 0  
+2024-10-04 ; OUT ; 15.00 ; CLT ; Accessories ; 2 ; -15.00 ; 1
+2024-10-01 ; OUT ; 12.34 ; GRC ; ; 3 ; -12.34 ; 0
+2024-10-01 ; OUT ; 45.67 ; DNG ; Lunch with friend ; 2 ; -45.67 ; 1
+2024-10-02 ; OUT ; 89.99 ; HOS ; Rent payment ; 3 ; -89.99 ; 0
+2024-10-02 ; OUT ; 30.00 ; PET ; Cat food ; 3 ; -30.00 ; 0  
+2024-10-02 ; IN ; 100 ; ; Freelance work  
+2024-10-03 ; OUT ; 15.75 ; SRV ; Phone bill ; 3 ; -15.75 ; 0  
+2024-10-03 ; OUT ; 20.00 ; TRP ; Gas for car ; 3 ; -20.00 ; 0  
+2024-10-04 ; OUT ; 150.00 ; HOS ; Electricity bill ; 3 ; -150.00 ; 0  
+2024-10-04 ; OUT ; 60.00 ; HOM ; Home repair supplies ; 2 ; -60.00 ; 1  
+2024-10-05 ; OUT ; 22.50 ; DNG ; Dinner out ; 2 ; -22.50 ; 1  
+2024-10-05 ; OUT ; 200.00 ; GRC ; Groceries ; 3 ; -200.00 ; 0  
+2024-10-06 ; OUT ; 70.00 ; PET ; Vet visit ; 3 ; -70.00 ; 0  
+2024-10-06 ; OUT ; 40.00 ; MSC ; Miscellaneous items ; 2 
+2024-10-07 ; OUT ; 10.00 ; CLT ; Clothing item ; 2 
+2024-10-07 ; OUT ; 5.00 ; GRC ; Coffee ; 1 ; -5.00 ; 1  
+2024-10-08 ; OUT ; 35.00 ; SRV ; Internet bill ; 3 ; -35.00 ; 0  
+2024-10-08 ; OUT ; 120.00 ; HOS ; Mortgage payment ; 3 ; -120.00 ; 0  
+2024-10-09 ; OUT ; 25.00 ; TRP ; Car repair ; 3 ; -25.00 ; 0  
+2024-10-09 ; OUT ; 15.00 ; PET ; Dog toys ; 2 ; -15.00 ; 1  
+2024-10-10 ; OUT ; 50.00 ; HOS ; Water bill ; 3 ; -50.00 ; 0  
+2024-10-10 ; OUT ; 10.00 ; MSC ; Snacks ; 1 ; -10.00 ; 1  
+2024-10-11 ; OUT ; 80.00 ; HOM ; Furniture ; 2 ; -80.00 ; 1  
+2024-10-11 ; OUT ; 25.00 ; GRC ; Fruits and vegetables ; 3 ; -25.00 ; 0  
+2024-10-12 ; OUT ; 12.00 ; DNG ; Coffee shop ; 2 ; -12.00 ; 1  
+2024-10-12 ; OUT ; 30.00 ; CLT ; Shoes ; 2 ; -30.00 ; 1  
+2024-10-12 ; IN ; 250 ; ; Project payment  
+2024-10-13 ; OUT ; 100.00 ; SRV ; Cable bill ; 3 ; -100.00 ; 0  
+2024-10-13 ; OUT ; 60.00 ; PET ; Pet grooming ; 2 ; -60.00 ; 1  
+2024-10-14 ; OUT ; 70.00 ; GRC ; Weekly groceries ; 3 ; -70.00 ; 0  
+2024-10-14 ; OUT ; 15.00 ; MSC ; Miscellaneous ; 1 ; -15.00 ; 1  
+2024-10-15 ; OUT ; 40.00 ; HOS ; Gas bill ; 3 ; -40.00 ; 0  
+2024-10-15 ; OUT ; 100.00 ; HOM ; Home decor ; 2 ; -100.00 ; 1  
+2024-10-16 ; OUT ; 55.00 ; PET ; Cat litter ; 3 ; -55.00 ; 0  
+2024-10-16 ; OUT ; 45.00 ; TRP ; Car insurance ; 3 ; -45.00 ; 0  
+2024-10-17 ; OUT ; 22.00 ; CLT ; Jacket ; 2 ; -22.00 ; 1  
+2024-10-17 ; OUT ; 8.00 ; GRC ; Snack ; 1 ; -8.00 ; 1  
+2024-10-18 ; OUT ; 120.00 ; HOS ; Property tax ; 3 ; -120.00 ; 0  
+2024-10-18 ; OUT ; 35.00 ; SRV ; Subscription ; 2 ; -35.00 ; 1  
+2024-10-19 ; OUT ; 25.00 ; GRC ; Meat ; 3 ; -25.00 ; 0  
+2024-10-19 ; OUT ; 50.00 ; MSC ; Hobby supplies ; 2 ; -50.00 ; 1  
+2024-10-20 ; OUT ; 30.00 ; PET ; Dog food ; 3 ; -30.00 ; 0  
+2024-10-20 ; OUT ; 10.00 ; DNG ; Snack ; 1 ; -10.00 ; 1  
+2024-10-21 ; OUT ; 90.00 ; HOS ; Utility bill ; 3 ; -90.00 ; 0  
+2024-10-21 ; OUT ; 60.00 ; HOM ; Gardening supplies ; 2 ; -60.00 ; 1  
+2024-10-22 ; OUT ; 15.00 ; SRV ; Mobile data ; 3 ; -15.00 ; 0  
+2024-10-22 ; OUT ; 25.00 ; TRP ; Gas refill ; 3 ; -25.00 ; 0  
+2024-10-23 ; OUT ; 18.00 ; CLT ; Accessory ; 2 ; -18.00 ; 1  
+2024-10-23 ; OUT ; 40.00 ; DNG ; Dinner ; 2 ; -40.00 ; 1  
+2024-10-24 ; OUT ; 80.00 ; HOS ; Rent ; 3 ; -80.00 ; 0  
+2024-10-24 ; OUT ; 40.00 ; PET ; Pet supplies ; 3 ; -40.00 ; 0  
+2024-10-25 ; OUT ; 10.00 ; MSC ; Drinks ; 1 ; -10.00 ; 1  
+2024-10-25 ; OUT ; 50.00 ; GRC ; Weekly groceries ; 3 ; -50.00 ; 0  
+2024-10-26 ; OUT ; 70.00 ; HOS ; Electricity ; 3 ; -70.00 ; 0  
+2024-10-26 ; OUT ; 25.00 ; DNG ; Coffee ; 2 ; -25.00 ; 1  
+2024-10-27 ; OUT ; 14.00 ; GRC ; Bread ; 3 ; -14.00 ; 1  
+2024-10-27 ; OUT ; 35.00 ; PET ; Cat food ; 3 ; -35.00 ; 0  
+2024-10-28 ; OUT ; 90.00 ; TRP ; Car insurance ; 3 ; -90.00 ; 0  
+2024-10-28 ; OUT ; 50.00 ; MSC ; Miscellaneous items ; 2 ; -50.00 ; 1  
+2024-10-29 ; OUT ; 55.00 ; SRV ; Internet bill ; 3 ; -55.00 ; 0  
+2024-10-30 ; OUT ; 120.00 ; HOS ; Rent ; 3 ; -120.00 ; 0  
+2024-10-30 ; OUT ; 40.00 ; PET ; Dog grooming ; 3 ; -40.00 ; 0  
+2024-11-01 ; OUT ; 50.00 ; GRC ; Groceries ; 3 ; -50.00 ; 0  
+2024-11-01 ; OUT ; 12.00 ; DNG ; Snack ; 2 ; -12.00 ; 1  
+2024-11-02 ; IN ; 5000 ; ; Salary  
+2024-11-02 ; OUT ; 30.00 ; PET ; Pet food ; 3 ; -30.00 ; 0  
+2024-11-03 ; OUT ; 45.00 ; HOS ; Utilities ; 3 ; -45.00 ; 0  
+2024-11-03 ; OUT ; 25.00 ; MSC ; Personal care ; 2 ; -25.00 ; 1
+2024-11-04 ; OUT ; 80.00 ; GRC ; Weekly shopping ; 3 ; -80.00 ; 0  
+2024-11-04 ; OUT ; 15.00 ; CLT ; Accessories ; 2 ; -15.00 ; 1
