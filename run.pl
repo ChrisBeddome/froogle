@@ -31,7 +31,8 @@ use constant COMMAND_MAPPING => {
     "list" => \&list,
     "details" => \&details,
     "cats" => \&categories,
-    "zz" => \&zz_owe
+    "zz" => \&zz_owe,
+    "settle" => \&settle
 };
 
 my %options;
@@ -67,8 +68,9 @@ sub parse_options {
 sub set_defaults {
     my %options = @_;
     my $command = $options{command};
-    $options{to} = get_today() unless defined $options{to} || $command eq "zz" || $command eq "help";
-    $options{from} = get_start_of_month() unless defined $options{from} || $command eq "zz" || $command eq "help";
+    $options{to} = get_today() unless defined $options{to} || grep { $command eq $_ } qw(zz help settle);
+    $options{from} = get_start_of_month() unless defined $options{from} || grep { $command eq $_ } qw(zz help settle);
+
     return %options;
 }
 
@@ -94,8 +96,9 @@ sub validate_options {
         'overview' => ['command', 'from', 'to'],
         'list' => ['command', 'from', 'to', 'necessity', 'category'],
         'details' => ['command', 'from', 'to', 'necessity', 'category'],
+        'cats' => ['command', 'from', 'to'],
         'zz' => ['command'],
-        'cats' => ['command', 'from', 'to']
+        'settle' => ['command']
     );
 
     for my $option (keys %options) {
@@ -154,6 +157,7 @@ sub help {
     say "   details:   Lists all transactions for the specified date range with additional details";
     say "   zz:        Displays a summary of money owed";
     say "   cats:      Displays a summary of spending per category";
+    say "   settle:    Updates all outstanding shared transactions to be marked as settled";
     say "";
     say "Options: ";
     say "";
@@ -291,6 +295,27 @@ sub zz_owe {
     say "";
 }
 
+sub settle {
+    my $user_confirmation = get_confirmation("Are you sure you want to mark all transactions as settled? (y/n):");
+    return unless $user_confirmation;
+
+    my @transactions = get_transactions;
+    backup_file();
+
+    foreach (@transactions) {
+        my $transaction = $_;
+        if (is_unsettled($transaction)) {
+            $transaction->{settled} = 1;
+        }
+    }
+
+    write_file(@transactions);
+
+    say "";
+    say "All outstanding shared transactions have been marked as settled";
+    say "";
+}
+
 sub print_transaction_simple {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
@@ -330,19 +355,7 @@ sub parse_file {
 
     while (my $line = <$fh>) {
         chomp $line;
-
-        my @values = split_line($line);
-        my @keys = KEY_MAPPING;
-        my %record;
-
-        @record{@keys} = (undef) x @keys;
-
-        for my $i (0 .. $#keys) {
-            if (defined $values[$i] && $values[$i] ne '') {
-                $record{$keys[$i]} = $values[$i];
-            }
-        }
-
+        my %record = decode_transaction($line);
         push @records, \%record;
     }
 
@@ -494,7 +507,7 @@ sub filter_transactions {
     foreach (@transactions) {
         my $transaction = $_;
         if ($transaction->{type} eq "IN") {
-            next if $options{command} eq "list" || $options{command} eq "details" || $options{command} eq "zz" || $options{command} eq "cats";
+            next if grep { $options{command} eq $_ } qw(list details zz cats);
         }
         if (defined $options{from} && defined $options{to}) {
             next unless is_date_in_range($transaction->{date}, $options{from}, $options{to});
@@ -548,4 +561,64 @@ sub format_date {
 
 sub formatted_date_range_text {
     return format_date($options{from}) . " - " . format_date($options{to});
+}
+
+sub get_confirmation {
+    my $prompt = shift // "Are you sure? (y/n): ";
+    my $response = '';
+    while ($response !~ /^[yn]$/i) {
+        say $prompt;
+        $response = <STDIN>;
+        chomp $response;
+    }
+    return lc($response) eq 'y' ? 1 : 0;
+}
+
+sub decode_transaction {
+    my $line = shift;
+    chomp $line;
+    my @keys = KEY_MAPPING;
+    my @values = split_line($line);
+    my %record;
+
+    @record{@keys} = (undef) x @keys;
+
+    for my $i (0 .. $#keys) {
+        if (defined $values[$i] && $values[$i] ne '') {
+            $record{$keys[$i]} = $values[$i];
+        }
+    }
+
+    return %record;
+}
+
+sub encode_transaction {
+    my $record = shift;
+    my @keys = KEY_MAPPING;
+    my @values = ();
+    for my $key (@keys) {
+        my $val = $record->{$key};
+        $val = '' if !defined $val;
+        push @values, $val;
+    }
+    $line = join(' ; ', @values);
+    $line =~ s/[ ;]+$//;  # Remove any combination of whitespace and semicolons from the end
+    return $line;
+}
+
+sub backup_file {
+    my $file = DATA_FILE_PATH;
+    my $backup_file = $file . '.bak';
+    unlink $backup_file if -e $backup_file;
+    rename $file, $backup_file or die "Could not backup file: $!";
+}
+
+sub write_file {
+    my @transactions = @_;
+    open my $fh, '>', DATA_FILE_PATH or die "Could not open output file: $!";
+    foreach (@transactions) {
+        my $transaction = $_;
+        print $fh encode_transaction($transaction) . "\n";
+    }
+    close $fh;
 }
