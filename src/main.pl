@@ -1,3 +1,4 @@
+use strict;
 use warnings;
 use feature 'say';
 use List::Util qw(sum);
@@ -37,7 +38,7 @@ use constant COMBINED_CATEGORY_CODES => {
     %{+ASS_CATEGORY_CODES},
 };
 use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
-# use constant DATA_FILE_PATH => './test/data.txt';
+# use constant DATA_FILE_PATH => '../test/data.txt';
 use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 use constant COMMAND_MAPPING => {
     "help" => \&help,
@@ -228,11 +229,11 @@ sub overview {
         }
     }
 
-    $income_str = format_currency($income, 10);
-    $assets_str = format_currency($assets, 10);
-    $necessary = format_currency($spending{'3'}, 10);
-    $unnecessary = format_currency($spending{'2'}, 10);
-    $frivilous = format_currency($spending{'1'}, 10);
+    my $income_str = format_currency($income, 10);
+    my $assets_str = format_currency($assets, 10);
+    my $necessary = format_currency($spending{'3'}, 10);
+    my $unnecessary = format_currency($spending{'2'}, 10);
+    my $frivilous = format_currency($spending{'1'}, 10);
 
     say "";
     say formatted_date_range_text();
@@ -523,7 +524,7 @@ sub who_owe_who_text {
 sub format_debt_line {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES->{$transaction->{'category'}};
-    $amount_owed = amount_owed_for_transaction($transaction);
+    my $amount_owed = amount_owed_for_transaction($transaction);
     return who_owe_who_text($amount_owed) . "         " . truncate_or_pad($desc, 30)  . "             " . format_currency(abs($amount_owed), 10);
 }
 
@@ -657,7 +658,7 @@ sub encode_transaction {
         $val = '' if !defined $val;
         push @values, $val;
     }
-    $line = join(' ; ', @values);
+    my $line = join(' ; ', @values);
     $line =~ s/[ ;]+$//;  # Remove any combination of whitespace and semicolons from the end
     return $line;
 }
