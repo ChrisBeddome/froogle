@@ -1,45 +1,16 @@
 use strict;
 use warnings;
+
 use feature 'say';
+
 use List::Util qw(sum);
 use Getopt::Long;
 
-use constant OUT_CATEGORY_CODES => {
-    'GRC' => 'Groceries',
-    'DNG' => 'Dining',
-    'ENT' => 'Entertainment/Leisure',
-    'HOS' => 'Housing',
-    'SRV' => 'Services',
-    'HOM' => 'Home',
-    'TRP' => 'Transportation',
-    'PET' => 'Pets',
-    'CLT' => 'Clothing',
-    'HLT' => 'Health',
-    'GFT' => 'Gifts',
-    'SLF' => 'Self Improvement',
-    'TOY' => 'Toys/Hobbies',
-    'OTH' => 'Other',
-};
-use constant IN_CATEGORY_CODES => {
-    'SAL' => 'Salary',
-    'BON' => 'Bonus',
-    'SAV' => 'Savings',
-    'GFT' => 'Gifts',
-    'OTH' => 'Other',
-};
-use constant ASS_CATEGORY_CODES => {
-    'STK' => 'Stock Market',
-    'RLS' => 'Real Estate',
-    'OTH' => 'Other'
-};
-use constant COMBINED_CATEGORY_CODES => {
-    %{+OUT_CATEGORY_CODES},
-    %{+IN_CATEGORY_CODES},
-    %{+ASS_CATEGORY_CODES},
-};
-use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
-# use constant DATA_FILE_PATH => '../test/data.txt';
-use constant KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
+require './Constants.pm';
+require './FileValidator.pm';
+require './Utils.pm';
+require './FileUtils.pm';
+
 use constant COMMAND_MAPPING => {
     "help" => \&help,
     "overview" => \&overview,
@@ -128,11 +99,11 @@ sub validate_options {
         }   
     }
 
-    if (defined $options{from} && !validate_date($options{from})) {
+    if (defined $options{from} && !Utils::validate_date($options{from})) {
         die "Invalid date format for 'from' option";
     }
 
-    if (defined $options{to} && !validate_date($options{to})) {
+    if (defined $options{to} && !Utils::validate_date($options{to})) {
         die "Invalid date format for 'to' option";
     }
 
@@ -140,15 +111,15 @@ sub validate_options {
         die "Necessity must be 1, 2, or 3";
     }
 
-    if (defined $options{category} && !exists COMBINED_CATEGORY_CODES->{$options{category}}) {
+    if (defined $options{category} && !exists COMBINED_CATEGORY_CODES()->{$options{category}}) {
         die "Invalid category code";
     }
 }
 
 sub get_transactions {
-    open(my $fh, '<', DATA_FILE_PATH) or die "Error when attempting to open file" .  DATA_FILE_PATH . ":\n$!";
+    open(my $fh, '<', Constants::DATA_FILE_PATH()) or die "Error when attempting to open file" .  Constants::DATA_FILE_PATH() . ":\n$!";
 
-    my @errors = validate_file($fh);
+    my @errors = FileValidator::validate_file($fh);
     if (@errors > 0) {
         report_errors(@errors);
         close($fh);
@@ -184,18 +155,18 @@ sub help {
     say "Category codes: ";
     say "";
     say "   Income: ";
-    for my $key (sort keys %{IN_CATEGORY_CODES()}) {
-        say "       $key: " . IN_CATEGORY_CODES->{$key};
+    for my $key (sort keys %{Constants::IN_CATEGORY_CODES()}) {
+        say "       $key: " . Constants::IN_CATEGORY_CODES()->{$key};
     }
     say "";
     say "   Expenses: ";
-    for my $key (sort keys %{OUT_CATEGORY_CODES()}) {
-        say "       $key: " . OUT_CATEGORY_CODES->{$key};
+    for my $key (sort keys %{Constants::OUT_CATEGORY_CODES()}) {
+        say "       $key: " . Constants::OUT_CATEGORY_CODES()->{$key};
     }
     say "";
     say "   Assets: ";
-    for my $key (sort keys %{ASS_CATEGORY_CODES()}) {
-        say "       $key: " . ASS_CATEGORY_CODES->{$key};
+    for my $key (sort keys %{Constants::ASS_CATEGORY_CODES()}) {
+        say "       $key: " . Constants::ASS_CATEGORY_CODES()->{$key};
     }
     say "";
     say "Examples: ";
@@ -283,7 +254,7 @@ sub details {
 sub categories {
     my %spending_per_categories;
     my @transactions = get_transactions;
-    for my $key (keys %{OUT_CATEGORY_CODES()}) {
+    for my $key (keys %{Constants::OUT_CATEGORY_CODES()}) {
         $spending_per_categories{$key} = 0;
     }
     for my $transaction (@transactions) {
@@ -302,7 +273,7 @@ sub categories {
     say "Category                              Amount    Percentage (spending)    Percentage (income)";
     say "=" x 92;
     for my $key (@sorted_keys) {
-        my $cat_text = truncate_or_pad(OUT_CATEGORY_CODES->{$key}, 30);
+        my $cat_text = truncate_or_pad(Constants::OUT_CATEGORY_CODES()->{$key}, 30);
         my $percentage_of_spending = $total_spending > 0 ? $spending_per_categories{$key} / $total_spending * 100 : 0;
         my $percentage_of_income = $total_income > 0 ? $spending_per_categories{$key} / $total_income * 100 : 0;
         my $percentage_of_spending_text = format_percentage($percentage_of_spending);
@@ -358,7 +329,7 @@ sub settle {
 
 sub print_transaction_simple {
     my $transaction = shift;
-    my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES->{$transaction->{'category'}};
+    my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES()->{$transaction->{'category'}};
     my $amount = format_currency($transaction->{amount}, 10);
     my $type = $transaction->{type};
     say "$amount on $transaction->{date} for $desc";
@@ -373,21 +344,6 @@ sub print_transaction_detailed {
     say "Necessity:      " . format_necessity($transaction->{necessity}) unless $transaction->{type} eq "IN";
 }
 
-sub validate_file {
-    my $fh = shift;
-    my @errors = ();
-
-    while (my $line = <$fh>) {
-        chomp $line;
-        my $error = validate_line($line);
-        if ($error) {
-            push(@errors, {line => $., message => $error}); 
-        }
-    }
-
-    seek($fh, 0, 0) or die "Could not seek: $!";
-    return @errors;
-}
 
 sub parse_file {
     my $fh = shift;
@@ -402,69 +358,7 @@ sub parse_file {
     return @records;
 }
 
-sub validate_line {
-    my ($line) = @_;
-    my @fields = split_line($line);
 
-    return "Invalid date format" unless validate_date($fields[0]);
-
-    unless ($fields[2] =~ /^\d+(\.\d+)?$/ && $fields[2] >= 0) {
-        return "Third field should be a positive number";
-    }
-
-    if ($fields[1] eq "IN") { 
-        return validate_income(@fields);
-    } elsif ($fields[1] eq "OUT") {
-        return validate_expense(@fields);
-    } elsif ($fields[1] eq "ASS") {
-        return validate_asset(@fields);
-    }
-
-    return "Invalid transaction type";
-}
-
-sub validate_income {
-    my (@fields) = @_;
-    return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
-    return "Invalid category code" unless exists IN_CATEGORY_CODES->{$fields[3]};
-    return undef;
-}
-
-sub validate_expense {
-    my (@fields) = @_;
-
-    return "Invalid number of fields" unless @fields >= 6 && @fields <= 8;
-    return "Invalid category code" unless exists OUT_CATEGORY_CODES->{$fields[3]};
-
-    unless ($fields[5] =~ /^[123]$/) {
-        return "Sixth field should be 1, 2, or 3";
-    }
-
-    return undef if @fields <= 6;
-
-    if ($fields[6] ne '' && $fields[6] !~ /^-?\d+(\.\d+)?$/ && $fields[6] ne 'HALF' && $fields[6] ne '-HALF') {
-        return "Seventh field should be a number, 'HALF', '-HALF' or empty";
-    }
-
-    return "Eighth field must not be empty if seventh field is present" if @fields < 8;
-
-    if ($fields[6] eq '' && $fields[7] ne '') {
-        return "Eighth field should be empty if seventh is empty";
-    }
-    elsif ($fields[7] ne '' && $fields[7] !~ /^[01]$/) {
-        return "Eighth field should be 0 or 1";
-    }
-
-    return undef;
-}
-
-sub validate_asset {
-    my (@fields) = @_;
-
-    return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
-    return "Invalid category code" unless exists ASS_CATEGORY_CODES->{$fields[3]};
-    return undef;
-}
 
 sub amount_owed_for_transaction {
     my $transaction = shift;
@@ -498,11 +392,6 @@ sub report_errors {
     }
 }
 
-sub split_line {
-    my $line = shift;
-    return map { s/^\s+|\s+$//gr } split /;\s*/, $line;
-}
-
 sub format_currency {
     my ($dollars, $width) = @_;
 
@@ -523,7 +412,7 @@ sub who_owe_who_text {
 
 sub format_debt_line {
     my $transaction = shift;
-    my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES->{$transaction->{'category'}};
+    my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES()->{$transaction->{'category'}};
     my $amount_owed = amount_owed_for_transaction($transaction);
     return who_owe_who_text($amount_owed) . "         " . truncate_or_pad($desc, 30)  . "             " . format_currency(abs($amount_owed), 10);
 }
@@ -634,8 +523,8 @@ sub get_confirmation {
 sub decode_transaction {
     my $line = shift;
     chomp $line;
-    my @keys = KEY_MAPPING;
-    my @values = split_line($line);
+    my @keys = Constants::FILE_KEY_MAPPING();
+    my @values = FileUtils::split_line($line);
     my %record;
 
     @record{@keys} = (undef) x @keys;
@@ -651,7 +540,7 @@ sub decode_transaction {
 
 sub encode_transaction {
     my $record = shift;
-    my @keys = KEY_MAPPING;
+    my @keys = Constants::FILE_KEY_MAPPING();
     my @values = ();
     for my $key (@keys) {
         my $val = $record->{$key};
@@ -664,7 +553,7 @@ sub encode_transaction {
 }
 
 sub backup_file {
-    my $file = DATA_FILE_PATH;
+    my $file = Constants::DATA_FILE_PATH();
     my $backup_file = $file . '.bak';
     unlink $backup_file if -e $backup_file;
     rename $file, $backup_file or die "Could not backup file: $!";
@@ -672,7 +561,7 @@ sub backup_file {
 
 sub write_file {
     my @transactions = @_;
-    open my $fh, '>', DATA_FILE_PATH or die "Could not open output file: $!";
+    open my $fh, '>', Constants::DATA_FILE_PATH() or die "Could not open output file: $!";
     foreach (@transactions) {
         my $transaction = $_;
         print $fh encode_transaction($transaction) . "\n";
@@ -695,9 +584,4 @@ sub total_income_for_transactions {
 sub is_empty {
     my ($string) = @_;
     return $string =~ /^\s*$/ ? 1 : 0;
-}
-
-sub validate_date {
-    my ($date) = @_;
-    return $date =~ /^\d{4}-\d{2}-\d{2}$/ ? 1 : 0;
 }

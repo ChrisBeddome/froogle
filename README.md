@@ -53,3 +53,6 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 - **SAV** - Savings
 - **ASS** - Assets (principal portion of mortgage)
 
+## Compile to binary
+
+`pp -o froogle src/main.pl`
