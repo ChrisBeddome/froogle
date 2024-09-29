@@ -3,7 +3,7 @@ use feature 'say';
 use List::Util qw(sum);
 use Getopt::Long;
 
-use constant CATEGORY_CODES => {
+use constant OUT_CATEGORY_CODES => {
     'GRC' => 'Groceries',
     'DNG' => 'Dining',
     'ENT' => 'Entertainment/Leisure',
@@ -17,10 +17,24 @@ use constant CATEGORY_CODES => {
     'GFT' => 'Gifts',
     'SLF' => 'Self Improvement',
     'TOY' => 'Toys/Hobbies',
-    'MSC' => 'Miscellaneous',
-    'INC' => 'Income',
+    'OTH' => 'Other',
+};
+use constant IN_CATEGORY_CODES => {
+    'SAL' => 'Salary',
+    'BON' => 'Bonus',
     'SAV' => 'Savings',
-    'ASS' => 'Assets'
+    'GFT' => 'Gifts',
+    'OTH' => 'Other',
+};
+use constant ASS_CATEGORY_CODES => {
+    'STK' => 'Stock Market',
+    'RLS' => 'Real Estate',
+    'OTH' => 'Other'
+};
+use constant COMBINED_CATEGORY_CODES => {
+    %{+OUT_CATEGORY_CODES},
+    %{+IN_CATEGORY_CODES},
+    %{+ASS_CATEGORY_CODES},
 };
 use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
 # use constant DATA_FILE_PATH => './test/data.txt';
@@ -113,11 +127,11 @@ sub validate_options {
         }   
     }
 
-    if (defined $options{from} && $options{from} !~ /^\d{4}-\d{2}-\d{2}$/) {
+    if (defined $options{from} && !validate_date($options{from})) {
         die "Invalid date format for 'from' option";
     }
 
-    if (defined $options{to} && $options{to} !~ /^\d{4}-\d{2}-\d{2}$/) {
+    if (defined $options{to} && !validate_date($options{to})) {
         die "Invalid date format for 'to' option";
     }
 
@@ -125,7 +139,7 @@ sub validate_options {
         die "Necessity must be 1, 2, or 3";
     }
 
-    if (defined $options{category} && !exists CATEGORY_CODES->{$options{category}}) {
+    if (defined $options{category} && !exists COMBINED_CATEGORY_CODES->{$options{category}}) {
         die "Invalid category code";
     }
 }
@@ -168,8 +182,19 @@ sub help {
     say "";
     say "Category codes: ";
     say "";
-    for my $key (sort keys %{CATEGORY_CODES()}) {
-        say "   $key: " . CATEGORY_CODES->{$key};
+    say "   Income: ";
+    for my $key (sort keys %{IN_CATEGORY_CODES()}) {
+        say "       $key: " . IN_CATEGORY_CODES->{$key};
+    }
+    say "";
+    say "   Expenses: ";
+    for my $key (sort keys %{OUT_CATEGORY_CODES()}) {
+        say "       $key: " . OUT_CATEGORY_CODES->{$key};
+    }
+    say "";
+    say "   Assets: ";
+    for my $key (sort keys %{ASS_CATEGORY_CODES()}) {
+        say "       $key: " . ASS_CATEGORY_CODES->{$key};
     }
     say "";
     say "Examples: ";
@@ -188,6 +213,7 @@ sub help {
 sub overview {
     my %spending = ("1" => 0, "2" => 0, "3" => 0);
     my $income = 0;
+    my $assets = 0;
 
     my @transactions = get_transactions;
 
@@ -195,12 +221,15 @@ sub overview {
         my $transaction = $_;
         if ($transaction->{type} eq "IN") { 
             $income += $transaction->{amount};
+        } elsif ($transaction->{type} eq "ASS") {
+            $assets += $transaction->{amount};
         } else {
             $spending{$transaction->{necessity}} += $transaction->{amount};
         }
     }
 
     $income_str = format_currency($income, 10);
+    $assets_str = format_currency($assets, 10);
     $necessary = format_currency($spending{'3'}, 10);
     $unnecessary = format_currency($spending{'2'}, 10);
     $frivilous = format_currency($spending{'1'}, 10);
@@ -210,12 +239,14 @@ sub overview {
     say "";
     say "Total Income:                   $income_str";
     say "";
+    say "Transfer to assets:             $assets_str";    
+    say "";
     say "Necessary spending:             $necessary";
     say "Unnecessary spending:           $unnecessary";
     say "Frivolous spending:             $frivilous";
     say "Total Spending:                 " . format_currency(sum(values %spending), 10);
     say "";
-    say "Income minus spending:          " . format_currency($income - sum(values %spending), 10);
+    say "Net                             " . format_currency($income - sum(values %spending) - $assets, 10);
     say "";
 }
 
@@ -251,7 +282,7 @@ sub details {
 sub categories {
     my %spending_per_categories;
     my @transactions = get_transactions;
-    for my $key (keys %{CATEGORY_CODES()}) {
+    for my $key (keys %{OUT_CATEGORY_CODES()}) {
         $spending_per_categories{$key} = 0;
     }
     for my $transaction (@transactions) {
@@ -270,7 +301,7 @@ sub categories {
     say "Category                              Amount    Percentage (spending)    Percentage (income)";
     say "=" x 92;
     for my $key (@sorted_keys) {
-        my $cat_text = truncate_or_pad(CATEGORY_CODES->{$key}, 30);
+        my $cat_text = truncate_or_pad(OUT_CATEGORY_CODES->{$key}, 30);
         my $percentage_of_spending = $total_spending > 0 ? $spending_per_categories{$key} / $total_spending * 100 : 0;
         my $percentage_of_income = $total_income > 0 ? $spending_per_categories{$key} / $total_income * 100 : 0;
         my $percentage_of_spending_text = format_percentage($percentage_of_spending);
@@ -326,7 +357,7 @@ sub settle {
 
 sub print_transaction_simple {
     my $transaction = shift;
-    my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
+    my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES->{$transaction->{'category'}};
     my $amount = format_currency($transaction->{amount}, 10);
     my $type = $transaction->{type};
     say "$amount on $transaction->{date} for $desc";
@@ -374,9 +405,7 @@ sub validate_line {
     my ($line) = @_;
     my @fields = split_line($line);
 
-    unless ($fields[0] =~ /^\d{4}-\d{2}-\d{2}$/) {
-        return "Invalid date format";
-    }
+    return "Invalid date format" unless validate_date($fields[0]);
 
     unless ($fields[2] =~ /^\d+(\.\d+)?$/ && $fields[2] >= 0) {
         return "Third field should be a positive number";
@@ -386,6 +415,8 @@ sub validate_line {
         return validate_income(@fields);
     } elsif ($fields[1] eq "OUT") {
         return validate_expense(@fields);
+    } elsif ($fields[1] eq "ASS") {
+        return validate_asset(@fields);
     }
 
     return "Invalid transaction type";
@@ -393,8 +424,8 @@ sub validate_line {
 
 sub validate_income {
     my (@fields) = @_;
-
     return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
+    return "Invalid category code" unless exists IN_CATEGORY_CODES->{$fields[3]};
     return undef;
 }
 
@@ -402,12 +433,7 @@ sub validate_expense {
     my (@fields) = @_;
 
     return "Invalid number of fields" unless @fields >= 6 && @fields <= 8;
-
-    unless (exists CATEGORY_CODES->{$fields[3]}) {
-        return "Invalid category code";
-    }
-
-    # The fifth field can be any string (no validation needed)
+    return "Invalid category code" unless exists OUT_CATEGORY_CODES->{$fields[3]};
 
     unless ($fields[5] =~ /^[123]$/) {
         return "Sixth field should be 1, 2, or 3";
@@ -428,6 +454,14 @@ sub validate_expense {
         return "Eighth field should be 0 or 1";
     }
 
+    return undef;
+}
+
+sub validate_asset {
+    my (@fields) = @_;
+
+    return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
+    return "Invalid category code" unless exists ASS_CATEGORY_CODES->{$fields[3]};
     return undef;
 }
 
@@ -488,7 +522,7 @@ sub who_owe_who_text {
 
 sub format_debt_line {
     my $transaction = shift;
-    my $desc = $transaction->{'desc'} // CATEGORY_CODES->{$transaction->{'category'}};
+    my $desc = $transaction->{'desc'} // COMBINED_CATEGORY_CODES->{$transaction->{'category'}};
     $amount_owed = amount_owed_for_transaction($transaction);
     return who_owe_who_text($amount_owed) . "         " . truncate_or_pad($desc, 30)  . "             " . format_currency(abs($amount_owed), 10);
 }
@@ -655,4 +689,14 @@ sub total_income_for_transactions {
         }
     }
     return $total;
+}
+
+sub is_empty {
+    my ($string) = @_;
+    return $string =~ /^\s*$/ ? 1 : 0;
+}
+
+sub validate_date {
+    my ($date) = @_;
+    return $date =~ /^\d{4}-\d{2}-\d{2}$/ ? 1 : 0;
 }
