@@ -167,8 +167,8 @@ sub help {
     say "Commands: ";
     say "";
     say "   overview:  Displays a summary of income and spending for the specified date range";
-    say "   list:      Lists all transactions for the specified date range";
-    say "   details:   Lists all transactions for the specified date range with additional details";
+    say "   list:      Lists all spending transactions for the specified date range";
+    say "   details:   Lists all spending transactions for the specified date range with additional details";
     say "   zz:        Displays a summary of money owed";
     say "   cats:      Displays a summary of spending per category";
     say "   settle:    Updates all outstanding shared transactions to be marked as settled";
@@ -562,7 +562,7 @@ sub filter_transactions {
 
     foreach (@transactions) {
         my $transaction = $_;
-        if ($transaction->{type} eq "IN") {
+        if ($transaction->{type} ne "OUT") {
             next if grep { $options{command} eq $_ } qw(list details zz);
         }
         if (defined $options{from} && defined $options{to}) {
