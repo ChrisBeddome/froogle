@@ -205,7 +205,6 @@ sub overview {
     $unnecessary = format_currency($spending{'2'}, 10);
     $frivilous = format_currency($spending{'1'}, 10);
 
-
     say "";
     say formatted_date_range_text();
     say "";
@@ -263,11 +262,20 @@ sub categories {
     say "";
     say formatted_date_range_text();
     say "";
+    
+    my $total_spending = sum(values %spending_per_categories);
+    my $total_income = total_income_for_transactions(@transactions);
 
-    my @sorted_keys = sort { $spending_per_categories{$a} <=> $spending_per_categories{$b} } keys %spending_per_categories;
+    my @sorted_keys = sort { $spending_per_categories{$b} <=> $spending_per_categories{$a} } keys %spending_per_categories;
+    say "Category                              Amount    Percentage (spending)    Percentage (income)";
+    say "=" x 92;
     for my $key (@sorted_keys) {
         my $cat_text = truncate_or_pad(CATEGORY_CODES->{$key}, 30);
-        say $cat_text . format_currency($spending_per_categories{$key}, 10);
+        my $percentage_of_spending = $total_spending > 0 ? $spending_per_categories{$key} / $total_spending * 100 : 0;
+        my $percentage_of_income = $total_income > 0 ? $spending_per_categories{$key} / $total_income * 100 : 0;
+        my $percentage_of_spending_text = format_percentage($percentage_of_spending);
+        my $percentage_of_income_text = format_percentage($percentage_of_income);
+        say $cat_text . format_currency($spending_per_categories{$key}, 10) . "                   " . $percentage_of_spending_text . "                " . $percentage_of_income_text;
     }
 
     say "";
@@ -500,6 +508,20 @@ sub format_necessity {
     return $necessary{$necessity_num};
 }
 
+sub format_percentage {
+    my ($number) = @_;
+
+    my $formatted = sprintf("%.2f%%", $number);
+
+    if ($number < 10) {
+        $formatted = "  $formatted";
+    } elsif ($number < 100) {
+        $formatted = " $formatted";
+    }
+
+    return $formatted;
+}
+
 sub filter_transactions {
     my @transactions = @_;
     my @filtered_transactions = ();
@@ -507,7 +529,7 @@ sub filter_transactions {
     foreach (@transactions) {
         my $transaction = $_;
         if ($transaction->{type} eq "IN") {
-            next if grep { $options{command} eq $_ } qw(list details zz cats);
+            next if grep { $options{command} eq $_ } qw(list details zz);
         }
         if (defined $options{from} && defined $options{to}) {
             next unless is_date_in_range($transaction->{date}, $options{from}, $options{to});
@@ -621,4 +643,16 @@ sub write_file {
         print $fh encode_transaction($transaction) . "\n";
     }
     close $fh;
+}
+
+sub total_income_for_transactions {
+    my @transactions = @_;
+    my $total = 0;
+    foreach (@transactions) {
+        my $transaction = $_;
+        if ($transaction->{type} eq "IN") {
+            $total += $transaction->{amount};
+        }
+    }
+    return $total;
 }
