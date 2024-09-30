@@ -55,4 +55,4 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 
 ## Compile to binary
 
-`pp -o froogle src/main.pl`
+`pp -x -c src/run.pl -o ./froogle`
