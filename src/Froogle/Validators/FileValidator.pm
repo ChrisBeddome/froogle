@@ -1,13 +1,13 @@
-package FileValidator;
+package Froogle::Validators::FileValidator;
 
 use strict;
 use warnings;
 
 use Exporter;
 
-require './Constants.pm';
-require './Utils.pm';
-require './FileUtils.pm';
+use Froogle::Constants;
+use Froogle::Utils::DateUtils;
+use Froogle::Utils::DataUtils;
 
 sub validate_file {
     my $fh = shift;
@@ -27,9 +27,9 @@ sub validate_file {
 
 sub validate_line {
     my ($line) = @_;
-    my @fields = FileUtils::split_line($line);
+    my @fields = Froogle::Utils::DataUtils::split_line($line);
 
-    return "Invalid date format" unless Utils::validate_date($fields[0]);
+    return "Invalid date format" unless Froogle::Utils::DateUtils::validate_date($fields[0]);
 
     unless ($fields[2] =~ /^\d+(\.\d+)?$/ && $fields[2] >= 0) {
         return "Third field should be a positive number";
@@ -49,7 +49,7 @@ sub validate_line {
 sub validate_income {
     my (@fields) = @_;
     return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
-    return "Invalid category code" unless exists Constants::IN_CATEGORY_CODES()->{$fields[3]};
+    return "Invalid category code" unless exists Froogle::Constants::IN_CATEGORY_CODES()->{$fields[3]};
     return undef;
 }
 
@@ -57,7 +57,7 @@ sub validate_expense {
     my (@fields) = @_;
 
     return "Invalid number of fields" unless @fields >= 6 && @fields <= 8;
-    return "Invalid category code" unless exists Constants::OUT_CATEGORY_CODES()->{$fields[3]};
+    return "Invalid category code" unless exists Froogle::Constants::OUT_CATEGORY_CODES()->{$fields[3]};
 
     unless ($fields[5] =~ /^[123]$/) {
         return "Sixth field should be 1, 2, or 3";
@@ -85,7 +85,7 @@ sub validate_asset {
     my (@fields) = @_;
 
     return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
-    return "Invalid category code" unless exists Constants::ASS_CATEGORY_CODES()->{$fields[3]};
+    return "Invalid category code" unless exists Froogle::Constants::ASS_CATEGORY_CODES()->{$fields[3]};
     return undef;
 }
 
