@@ -55,4 +55,5 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 
 ## Compile to binary
 
-`pp -x -c src/run.pl -o ./froogle`
+[PAR::Packer](https://metacpan.org/pod/pp) can be used to bundle the source files into a portable exectuable
+A wrapper script to simplify this process is found in `bin/bundle`
