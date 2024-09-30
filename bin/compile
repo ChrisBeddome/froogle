@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+script_dir="$(dirname "$(realpath "$0")")"
+
+pp -x -c "$script_dir/../src/run.pl" -o "$script_dir/../froogle"
