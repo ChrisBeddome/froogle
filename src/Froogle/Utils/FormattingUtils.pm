@@ -28,8 +28,14 @@ sub format_percentage {
     return $formatted;
 }
 
+sub trim {
+    my $string = shift;
+    $string =~ s/^\s+//;
+    $string =~ s/\s+$//;
+    return $string;
+}
 
-our @EXPORT_OK = qw(truncate_or_pad format_percentage);
+our @EXPORT_OK = qw(truncate_or_pad format_percentage trim);
 
 1;
 

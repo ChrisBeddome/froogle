@@ -40,6 +40,7 @@ sub parse_file {
 
     while (my $line = <$fh>) {
         chomp $line;
+        next if (line_empty($line));
         my %record = decode_transaction($line);
         push @records, \%record;
     }
@@ -120,6 +121,11 @@ sub amount_owed_for_transaction {
         return $owe_zz;
     }
     return 0;
+}
+
+sub line_empty {
+    my $line = shift;
+    return Froogle::Utils::FormattingUtils::trim($line) eq '';
 }
 
 

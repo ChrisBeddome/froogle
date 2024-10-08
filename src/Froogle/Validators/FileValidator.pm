@@ -8,6 +8,7 @@ use Exporter;
 use Froogle::Constants;
 use Froogle::Utils::DateUtils;
 use Froogle::Utils::DataUtils;
+use Froogle::Utils::FormattingUtils;
 
 sub validate_file {
     my $fh = shift;
@@ -27,6 +28,8 @@ sub validate_file {
 
 sub validate_line {
     my ($line) = @_;
+    return if line_empty($line);
+
     my @fields = Froogle::Utils::DataUtils::split_line($line);
 
     return "Invalid date format" unless Froogle::Utils::DateUtils::validate_date($fields[0]);
@@ -87,6 +90,11 @@ sub validate_asset {
     return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
     return "Invalid category code" unless exists Froogle::Constants::ASS_CATEGORY_CODES()->{$fields[3]};
     return undef;
+}
+
+sub line_empty {
+    my $line = shift;
+    return Froogle::Utils::FormattingUtils::trim($line) eq '';
 }
 
 our @EXPORT_OK = qw(validate_file);
