@@ -16,6 +16,19 @@ sub name {
     return "overview";
 }
 
+sub applicable_options {
+    return qw(command from to);
+}
+
+sub validate_options {
+    my %options = (@_);
+    for my $option (keys %options) {
+        if (defined $options{$option} && !grep { $_ eq $option } applicable_options) {
+            die "Option '$option' not applicable to ${\name}";
+        }
+    }
+}
+
 sub run {
     my %spending = ("1" => 0, "2" => 0, "3" => 0);
     my $income = 0;

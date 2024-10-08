@@ -4,6 +4,7 @@ use Getopt::Long qw(GetOptionsFromArray);
 use Exporter;
 
 use Froogle::Utils::DateUtils;
+use Froogle::CommandDispatcher;
 
 my %options;
 
@@ -58,22 +59,28 @@ sub get_command {
 sub validate_options {
     my (%options) = @_;
     my $command = $options{command};
-
-    my %applicable_options = (
-        'help'=> ['command'],
-        'overview' => ['command', 'from', 'to'],
-        'list' => ['command', 'from', 'to', 'necessity', 'category'],
-        'details' => ['command', 'from', 'to', 'necessity', 'category'],
-        'cats' => ['command', 'from', 'to'],
-        'zz' => ['command'],
-        'settle' => ['command']
-    );
-
-    for my $option (keys %options) {
-        if (defined $options{$option} && !grep { $_ eq $option } @{$applicable_options{$command}}) {
-            die "Option '$option' not applicable to '${command}' command";
-        }
+    my $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
+    
+    my $validate_method = $command_package->can('validate_options');
+    if ($validate_method) {
+        $validate_method->(%options);
     }
+
+    # my %applicable_options = (
+    #     'help'=> ['command'],
+    #     'overview' => ['command', 'from', 'to'],
+    #     'list' => ['command', 'from', 'to', 'necessity', 'category'],
+    #     'details' => ['command', 'from', 'to', 'necessity', 'category'],
+    #     'cats' => ['command', 'from', 'to'],
+    #     'zz' => ['command'],
+    #     'settle' => ['command']
+    # );
+
+    # for my $option (keys %options) {
+    #     if (defined $options{$option} && !grep { $_ eq $option } @{$applicable_options{$command}}) {
+    #         die "Option '$option' not applicable to '${command}' command";
+    #     }
+    # }
 
     if (defined $options{from} && $options{to}) {
         if ($options{from} gt $options{to}) {

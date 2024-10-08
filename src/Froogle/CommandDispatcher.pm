@@ -12,7 +12,7 @@ my %command_package_mapping;
 
 sub run_command {
     my ($command, $options) = @_;
-    my $package = $command_package_mapping{$command};
+    my $package = get_package_from_command($command);
     die "Command not found: $command, run froogle help to see list of available commands." unless $package;
     $package->run($options);
 }
@@ -55,8 +55,13 @@ sub build_mapping {
     return %mapping;
 }
 
+sub get_package_from_command {
+    my $command = shift;
+    return $command_package_mapping{$command};
+}
+
 initialize();
 
-our @EXPORT_OK = qw(run_command);
+our @EXPORT_OK = qw(run_command get_package_from_command);
 
 1;
