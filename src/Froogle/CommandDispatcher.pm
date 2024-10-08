@@ -8,19 +8,19 @@ use Exporter;
 use Froogle::Constants;
 use Froogle::Utils::FileUtils;
 
-my %command_mapping;
+my %command_package_mapping;
 
 sub run_command {
     my ($command, $options) = @_;
-    my $command_sub = $command_mapping{$command};
-    die "Command not found: $command, run froogle help to see list of available commands." unless $command_sub; 
-    $command_sub->($options);
+    my $package = $command_package_mapping{$command};
+    die "Command not found: $command, run froogle help to see list of available commands." unless $package;
+    $package->run($options);
 }
 
 sub initialize {
     my @files = get_command_files();
     load_all_command_files(@files);
-    %command_mapping = build_mapping(@files);
+    %command_package_mapping = build_mapping(@files);
 }
 
 sub get_command_files {
@@ -48,8 +48,8 @@ sub build_mapping {
     foreach my $file (@files) {
         my $package_name = Froogle::Utils::FileUtils::package_name_from_file($file);
         my $command_name = $package_name->name();
-        my $command_sub = $package_name->can("run");
-        $mapping{$command_name} = $command_sub;
+        die "Command $command_name does not have a run sub" unless $package_name->can("run");
+        $mapping{$command_name} = $package_name
     }
 
     return %mapping;
