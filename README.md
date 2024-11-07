@@ -22,7 +22,7 @@ run `froogle help` to view options
   - `1` = unnecessary and does not align with goals (e.g., McDonald's)
   - `2` = unnecessary but aligns with goals or can be otherwise justified (e.g., home improvement, self-improvement, gifts, hobbies)
   - `3` = necessary (e.g., rent, gas, groceries)
-- **OWE ZZ** (o): negative for ZZ owe Chris
+- **OWE ZZ** (o): negative for ZZ owe Chris -- keywords HALF or -HALF can be used to indicate 50% split -- note that 50% split means 100% of the value in AMOUNT is owed, as AMOUNT only considers what was paid myself
 - **SETTLED** (o): `0/1`
 
 For income (IN) only, `DATE` and `AMOUNT` are required.
