@@ -44,7 +44,7 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 - **TRP** - Transportation (gas, repair, insurance)
 - **PET** - Pets
 - **CLT** - Clothing
-- **HLT** - Health (includes self care)
+- **HLT** - Health (includes medicine, self care)
 - **GFT** - Gifts
 - **SLF** - Self Improvement (education, gym)
 - **TOY** - Toys, hobbies (music gear, headphones, frisbee etc)
