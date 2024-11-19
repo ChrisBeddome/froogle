@@ -37,7 +37,7 @@ For income (IN) only, `DATE` and `AMOUNT` are required.
 
 - **GRC** - Groceries
 - **DNG** - Dining
-- **ENT** - Entertainment/Leisure
+- **ENT** - Entertainment/Leisure/Social
 - **HOS** - Housing (rent, utilities, insurance, interest portion of mortgage, property tax)
 - **SRV** - Services (phone, internet, etc.)
 - **HOM** - Home Improvement, household supplies, decor
