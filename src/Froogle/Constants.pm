@@ -39,7 +39,7 @@ use constant IN_CATEGORY_CODES => {
 };
 
 use constant ASS_CATEGORY_CODES => {
-    'STK' => 'Stock Market',
+    'EQT' => 'Equities',
     'RLS' => 'Real Estate',
     'OTH' => 'Other'
 };
