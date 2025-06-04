@@ -9,9 +9,10 @@ use Froogle::OptionsManager;
 use Froogle::CommandDispatcher;
 
 sub run {
-    Froogle::OptionsManager::set_options_from_command_line_args(\@ARGV);
+    Froogle::OptionsManager::initialize(\@ARGV);
     my %options = Froogle::OptionsManager::get_options();
-    Froogle::CommandDispatcher::run_command($options{command}, %options);
+    my $command = Froogle::OptionsManager::get_command();
+    Froogle::CommandDispatcher::run_command($command, %options);
 }
 
 our @EXPORT_OK = qw(run);

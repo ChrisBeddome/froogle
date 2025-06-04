@@ -6,39 +6,53 @@ use Exporter;
 use Froogle::Utils::DateUtils;
 use Froogle::CommandDispatcher;
 
+my $command;
+my $command_package;
 my %options;
+
+sub initialize {
+    my $args = shift;
+    $command = get_command($args);
+    $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
+    $options = options_from_command_line_args($args);
+    $options = combine_with_defaults(%options);
+    validate_options($options);
+}
 
 sub get_options {
     return %options;
 }
 
-sub set_options_from_command_line_args {
+sub get_command {
+    return $command;
+}
+
+sub options_from_command_line_args {
     my $args = shift;
     my %temp_options = parse_options($args);
-    %temp_options = set_defaults(%temp_options);
-    validate_options(%temp_options);
-    %options = %temp_options;
+    return %temp_options;
+}
+
+sub combine_with_defaults {
+    my %temp_options = @_;
+    my %defaults = $command_package->defaults();
+    
+    for my $key (keys %defaults) {
+        $temp_options{$key} //= $defaults{$key};
+    }
+    
+    return %temp_options;
 }
 
 sub parse_options {
     my $args = shift;
     my %options;
-    $options{command} = get_command($args);
     GetOptionsFromArray($args,
         'from|f=s'   => \$options{from},
         'to|t=s'   => \$options{to},
         'necessity|n=i'   => \$options{necessity},
         'category|c=s'   => \$options{category}
     ) or die "Error in command line arguments";
-    return %options;
-}
-
-sub set_defaults {
-    my %options = @_;
-    my $command = $options{command};
-    $options{to} = Froogle::Utils::DateUtils::get_today() unless defined $options{to} || grep { $command eq $_ } qw(zz help settle);
-    $options{from} = Froogle::Utils::DateUtils::get_start_of_month() unless defined $options{from} || grep { $command eq $_ } qw(zz help settle);
-
     return %options;
 }
 
@@ -58,12 +72,19 @@ sub get_command {
 
 sub validate_options {
     my (%options) = @_;
-    my $command = $options{command};
-    my $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
-    
-    my $validate_method = $command_package->can('validate_options');
-    if ($validate_method) {
-        $validate_method->(%options);
+
+    my %applicable_options = $command_package->can('applicable_options');
+
+    for my $option ( grep { $_ ne 'command' } keys %options ) {
+        if (defined $options{$option} && !grep { $_ eq $option } @{$applicable_options{$command}}) {
+            die "Option '$option' not applicable to '${command}' command";
+        }
+    }
+
+    my $command_specific_validations = $command_package->can('validate_options');
+
+    if ($command_specific_validations) {
+        $command_specific_validations->(%options);
     }
 
     # my %applicable_options = (
@@ -75,12 +96,12 @@ sub validate_options {
     #     'zz' => ['command'],
     #     'settle' => ['command']
     # );
+    
+    run_general_validations(%options);
+}
 
-    # for my $option (keys %options) {
-    #     if (defined $options{$option} && !grep { $_ eq $option } @{$applicable_options{$command}}) {
-    #         die "Option '$option' not applicable to '${command}' command";
-    #     }
-    # }
+sub run_general_validations {
+    my %options = @_;
 
     if (defined $options{from} && $options{to}) {
         if ($options{from} gt $options{to}) {

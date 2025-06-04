@@ -17,16 +17,19 @@ sub name {
 }
 
 sub applicable_options {
-    return qw(command from to);
+    return qw(from to);
 }
 
 sub validate_options {
     my %options = (@_);
-    for my $option (keys %options) {
-        if (defined $options{$option} && !grep { $_ eq $option } applicable_options) {
-            die "Option '$option' not applicable to ${\name}";
-        }
-    }
+}
+
+sub defaults {
+    return (
+        to => Froogle::Utils::DateUtils::get_today(),
+        from => Froogle::Utils::DateUtils::get_start_of_month()
+    );
+
 }
 
 sub run {
