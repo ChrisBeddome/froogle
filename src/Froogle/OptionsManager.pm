@@ -12,9 +12,9 @@ my %options;
 
 sub initialize {
     my $args = shift;
-    $command = get_command($args);
+    $command = command_from_args($args);
     $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
-    $options = options_from_command_line_args($args);
+    $options = options_from_args($args);
     $options = combine_with_defaults(%options);
     validate_options($options);
 }
@@ -27,7 +27,7 @@ sub get_command {
     return $command;
 }
 
-sub options_from_command_line_args {
+sub options_from_args {
     my $args = shift;
     my %temp_options = parse_options($args);
     return %temp_options;
@@ -56,7 +56,7 @@ sub parse_options {
     return %options;
 }
 
-sub get_command {
+sub command_from_args {
     my $args = shift;
     my $command = 'overview'; #default
     my $first_arg = shift @$args;
@@ -126,6 +126,6 @@ sub run_general_validations {
     }
 }
 
-our @EXPORT_OK = qw(get_options_from_command_line_args);
+our @EXPORT_OK = qw(initialize get_options get_command);
 
 1;
