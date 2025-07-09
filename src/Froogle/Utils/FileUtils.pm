@@ -3,31 +3,56 @@ package Froogle::Utils::FileUtils;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
+use Cwd 'abs_path';
+use File::Basename; 
+
+sub path_from_project_root {
+    my $filepath = shift;
+    $filepath = "/$filepath" unless substr($filepath, 0, 1) eq '/';
+    return abs_path(project_root() . $filepath);
+}
+
+sub path_from_application_root {
+    my $filepath = shift;
+    $filepath = "/$filepath" unless substr($filepath, 0, 1) eq '/';
+    return abs_path(application_root() . $filepath);
+}
+
+sub project_root {
+    return find_dir_from_root("froogle");
+}
+
+sub application_root {
+    return find_dir_from_root("Froogle");
+}
+
+sub find_dir_from_root {
+    my $dirname = shift;
+    my $filepath = abs_path(__FILE__);
+
+    my $pos = index($filepath, $dirname);
+    if ($pos != -1) {
+        return substr($filepath, 0, $pos + length($dirname));
+    } else {
+        die "Directory not found: $dirname"
+    }
+}
 
 sub package_name_from_file {
     my $filepath = shift;
 
-    # Find the position of the first occurrence of 'Froogle'
     if ($filepath =~ m{(.*?/Froogle)}s) {
-        # Get the part after 'Froogle'
         my $modified_path = $';
-
-        # Remove the .pm extension if it exists
         $modified_path =~ s/\.pm$//;
-
-        # Replace path separators with '::'
         $modified_path =~ s{[/\\]}{::}g;
-
-        # Return the modified path
         return "Froogle" . $modified_path;
     }
 
-    # If 'Froogle' not found, return undef
     return undef;
 }
 
-our @EXPORT_OK = qw(package_name_from_file);
+our @EXPORT = qw(package_name_from_file path_from_project_root path_from_application_root);
 
 1;
 
