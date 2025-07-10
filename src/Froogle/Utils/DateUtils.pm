@@ -50,7 +50,6 @@ sub is_date_in_range {
     }
 }
 
-
 our @EXPORT_OK = qw(validate_date get_today get_start_of_month formatted_date_range is_date_in_range);
 
 1;

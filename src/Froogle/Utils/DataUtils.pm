@@ -75,13 +75,14 @@ sub decode_transaction {
 
 sub filter_transactions {
     my %options = Froogle::OptionsManager::get_options();
+    my $command = Froogle::OptionsManager::get_command();
     my @transactions = @_;
     my @filtered_transactions = ();
 
     foreach (@transactions) {
         my $transaction = $_;
         if ($transaction->{type} ne "OUT") {
-            next if grep { $options{command} eq $_ } qw(list details zz);
+            next if grep { $command eq $_ } qw(list details zz);
         }
         if (defined $options{from} && defined $options{to}) {
             next unless Froogle::Utils::DateUtils::is_date_in_range($transaction->{date}, $options{from}, $options{to});

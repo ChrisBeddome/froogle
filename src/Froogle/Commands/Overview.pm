@@ -22,6 +22,7 @@ sub applicable_options {
 
 sub validate_options {
     my %options = (@_);
+    return 1;
 }
 
 sub defaults {
@@ -29,7 +30,6 @@ sub defaults {
         to => Froogle::Utils::DateUtils::get_today(),
         from => Froogle::Utils::DateUtils::get_start_of_month()
     );
-
 }
 
 sub run {

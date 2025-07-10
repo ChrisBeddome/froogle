@@ -14,9 +14,9 @@ sub initialize {
     my $args = shift;
     $command = command_from_args($args);
     $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
-    $options = options_from_args($args);
-    $options = combine_with_defaults(%options);
-    validate_options($options);
+    %options = options_from_args($args);
+    %options = combine_with_defaults(%options);
+    validate_options(%options);
 }
 
 sub get_options {
@@ -53,6 +53,11 @@ sub parse_options {
         'necessity|n=i'   => \$options{necessity},
         'category|c=s'   => \$options{category}
     ) or die "Error in command line arguments";
+
+    for my $key (keys %options) {
+        delete $options{$key} unless defined $options{$key};
+    }
+
     return %options;
 }
 
@@ -73,10 +78,10 @@ sub command_from_args {
 sub validate_options {
     my (%options) = @_;
 
-    my %applicable_options = $command_package->can('applicable_options');
+    my @applicable_options = $command_package->applicable_options();
 
     for my $option ( grep { $_ ne 'command' } keys %options ) {
-        if (defined $options{$option} && !grep { $_ eq $option } @{$applicable_options{$command}}) {
+        if (defined $options{$option} && !grep { $_ eq $option } @applicable_options) {
             die "Option '$option' not applicable to '${command}' command";
         }
     }
