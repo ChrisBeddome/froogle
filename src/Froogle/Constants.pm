@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Exporter;
-use Froogle::Utils::FileUtils;
+use Froogle::Utils::File;
 
 # use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
 use constant DATA_FILE_PATH => path_from_project_root('/test/data.txt');

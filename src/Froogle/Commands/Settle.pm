@@ -7,7 +7,7 @@ use feature 'say';
 use Exporter;
 
 use Froogle::Constants;
-use Froogle::Utils::DataUtils;
+use Froogle::Utils::Data;
 
 sub name {
     return "settle";
@@ -17,12 +17,12 @@ sub run {
     my $user_confirmation = get_confirmation("Are you sure you want to mark all transactions as settled? (y/n):");
     return unless $user_confirmation;
 
-    my @transactions = Froogle::Utils::DataUtils::get_transactions();
+    my @transactions = Froogle::Utils::Data::get_transactions();
     backup_file();
 
     foreach (@transactions) {
         my $transaction = $_;
-        if (Froogle::Utils::DataUtils::is_unsettled($transaction)) {
+        if (Froogle::Utils::Data::is_unsettled($transaction)) {
             $transaction->{settled} = 1;
         }
     }

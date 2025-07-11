@@ -6,7 +6,7 @@ use warnings;
 use Exporter;
 
 use Froogle::Constants;
-use Froogle::Utils::FileUtils;
+use Froogle::Utils::File;
 
 my %command_package_mapping;
 
@@ -30,7 +30,7 @@ sub get_command_files {
 sub load_all_command_files {
     my @files = @_;
     foreach my $file (@files) {
-        my $package_name = Froogle::Utils::FileUtils::package_name_from_file($file);
+        my $package_name = Froogle::Utils::File::package_name_from_file($file);
 
         eval {
             require $file;
@@ -46,7 +46,7 @@ sub build_mapping {
     my @files = @_;
     my %mapping = ();
     foreach my $file (@files) {
-        my $package_name = Froogle::Utils::FileUtils::package_name_from_file($file);
+        my $package_name = Froogle::Utils::File::package_name_from_file($file);
         my $command_name = $package_name->name();
         die "Command $command_name does not have a run sub" unless $package_name->can("run");
         $mapping{$command_name} = $package_name

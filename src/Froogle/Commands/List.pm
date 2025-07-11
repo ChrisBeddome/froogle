@@ -7,19 +7,19 @@ use feature 'say';
 use Exporter;
 
 use Froogle::Constants;
-use Froogle::Utils::DataUtils;
-use Froogle::Utils::DateUtils;
-use Froogle::Utils::CurrencyUtils;
+use Froogle::Utils::Data;
+use Froogle::Utils::Date;
+use Froogle::Utils::Currency;
 
 sub name {
     return "list";
 }
 
 sub run {
-    my @transactions = Froogle::Utils::DataUtils::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions;
 
     say "";
-    say Froogle::Utils::DateUtils::formatted_date_range();
+    say Froogle::Utils::Date::formatted_date_range();
     say "";
 
     foreach (@transactions) {
@@ -32,7 +32,7 @@ sub run {
 sub print_transaction {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // Froogle::Constants::COMBINED_CATEGORY_CODES()->{$transaction->{'category'}};
-    my $amount = Froogle::Utils::CurrencyUtils::format_currency($transaction->{amount}, 10);
+    my $amount = Froogle::Utils::Currency::format_currency($transaction->{amount}, 10);
     my $type = $transaction->{type};
     say "$amount on $transaction->{date} for $desc";
 }

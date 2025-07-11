@@ -3,7 +3,7 @@ package Froogle::OptionsManager;
 use Getopt::Long qw(GetOptionsFromArray);
 use Exporter;
 
-use Froogle::Utils::DateUtils;
+use Froogle::Utils::Date;
 use Froogle::CommandDispatcher;
 
 my $command;
@@ -114,11 +114,11 @@ sub run_general_validations {
         }   
     }
 
-    if (defined $options{from} && !Froogle::Utils::DateUtils::validate_date($options{from})) {
+    if (defined $options{from} && !Froogle::Utils::Date::validate_date($options{from})) {
         die "Invalid date format for 'from' option";
     }
 
-    if (defined $options{to} && !Froogle::Utils::DateUtils::validate_date($options{to})) {
+    if (defined $options{to} && !Froogle::Utils::Date::validate_date($options{to})) {
         die "Invalid date format for 'to' option";
     }
 

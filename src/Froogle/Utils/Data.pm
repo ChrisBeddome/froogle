@@ -1,4 +1,4 @@
-package Froogle::Utils::DataUtils;
+package Froogle::Utils::Data;
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use Exporter;
 use Froogle::Constants;
 use Froogle::Validators::FileValidator;
 use Froogle::OptionsManager;
-use Froogle::Utils::DateUtils;
+use Froogle::Utils::Date;
 
 sub split_line {
     my $line = shift;
@@ -85,7 +85,7 @@ sub filter_transactions {
             next if grep { $command eq $_ } qw(list details zz);
         }
         if (defined $options{from} && defined $options{to}) {
-            next unless Froogle::Utils::DateUtils::is_date_in_range($transaction->{date}, $options{from}, $options{to});
+            next unless Froogle::Utils::Date::is_date_in_range($transaction->{date}, $options{from}, $options{to});
         }
         if (defined $options{necessity}) {
             next unless $transaction->{necessity} == $options{necessity};
@@ -126,7 +126,7 @@ sub amount_owed_for_transaction {
 
 sub line_empty {
     my $line = shift;
-    return Froogle::Utils::FormattingUtils::trim($line) eq '';
+    return Froogle::Utils::Formatting::trim($line) eq '';
 }
 
 

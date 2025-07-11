@@ -7,10 +7,9 @@ use feature 'say';
 use List::Util qw(sum);
 use Exporter;
 
-use Froogle::Constants;
-use Froogle::Utils::DataUtils;
-use Froogle::Utils::DateUtils;
-use Froogle::Utils::CurrencyUtils;
+use Froogle::Utils::Data;
+use Froogle::Utils::Date;
+use Froogle::Utils::Currency;
 
 sub name {
     return "overview";
@@ -27,8 +26,8 @@ sub validate_options {
 
 sub defaults {
     return (
-        to => Froogle::Utils::DateUtils::get_today(),
-        from => Froogle::Utils::DateUtils::get_start_of_month()
+        to => Froogle::Utils::Date::get_today(),
+        from => Froogle::Utils::Date::get_start_of_month()
     );
 }
 
@@ -37,7 +36,7 @@ sub run {
     my $income = 0;
     my $assets = 0;
 
-    my @transactions = Froogle::Utils::DataUtils::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions;
 
     foreach (@transactions) {
         my $transaction = $_;
@@ -50,14 +49,14 @@ sub run {
         }
     }
 
-    my $income_str = Froogle::Utils::CurrencyUtils::format_currency($income, 10);
-    my $assets_str = Froogle::Utils::CurrencyUtils::format_currency($assets, 10);
-    my $necessary = Froogle::Utils::CurrencyUtils::format_currency($spending{'3'}, 10);
-    my $unnecessary = Froogle::Utils::CurrencyUtils::format_currency($spending{'2'}, 10);
-    my $frivilous = Froogle::Utils::CurrencyUtils::format_currency($spending{'1'}, 10);
+    my $income_str = Froogle::Utils::Currency::format_currency($income, 10);
+    my $assets_str = Froogle::Utils::Currency::format_currency($assets, 10);
+    my $necessary = Froogle::Utils::Currency::format_currency($spending{'3'}, 10);
+    my $unnecessary = Froogle::Utils::Currency::format_currency($spending{'2'}, 10);
+    my $frivilous = Froogle::Utils::Currency::format_currency($spending{'1'}, 10);
 
     say "";
-    say Froogle::Utils::DateUtils::formatted_date_range();
+    say Froogle::Utils::Date::formatted_date_range();
     say "";
     say "Total Income:                   $income_str";
     say "";
@@ -66,9 +65,9 @@ sub run {
     say "Necessary spending:             $necessary";
     say "Unnecessary spending:           $unnecessary";
     say "Frivolous spending:             $frivilous";
-    say "Total Spending:                 " . Froogle::Utils::CurrencyUtils::format_currency(sum(values %spending), 10);
+    say "Total Spending:                 " . Froogle::Utils::Currency::format_currency(sum(values %spending), 10);
     say "";
-    say "Net                             " . Froogle::Utils::CurrencyUtils::format_currency($income - sum(values %spending) - $assets, 10);
+    say "Net                             " . Froogle::Utils::Currency::format_currency($income - sum(values %spending) - $assets, 10);
     say "";
 }
 

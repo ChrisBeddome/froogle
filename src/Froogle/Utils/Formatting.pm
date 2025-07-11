@@ -1,4 +1,4 @@
-package Froogle::Utils::FormattingUtils;
+package Froogle::Utils::Formatting;
 
 use strict;
 use warnings;

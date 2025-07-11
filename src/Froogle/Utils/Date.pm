@@ -1,4 +1,4 @@
-package Froogle::Utils::DateUtils;
+package Froogle::Utils::Date;
 
 use strict;
 use warnings;

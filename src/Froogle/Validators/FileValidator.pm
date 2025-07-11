@@ -6,9 +6,9 @@ use warnings;
 use Exporter;
 
 use Froogle::Constants;
-use Froogle::Utils::DateUtils;
-use Froogle::Utils::DataUtils;
-use Froogle::Utils::FormattingUtils;
+use Froogle::Utils::Date;
+use Froogle::Utils::Data;
+use Froogle::Utils::Formatting;
 
 sub validate_file {
     my $fh = shift;
@@ -30,9 +30,9 @@ sub validate_line {
     my ($line) = @_;
     return if line_empty($line);
 
-    my @fields = Froogle::Utils::DataUtils::split_line($line);
+    my @fields = Froogle::Utils::Data::split_line($line);
 
-    return "Invalid date format" unless Froogle::Utils::DateUtils::validate_date($fields[0]);
+    return "Invalid date format" unless Froogle::Utils::Date::validate_date($fields[0]);
 
     unless ($fields[2] =~ /^\d+(\.\d+)?$/ && $fields[2] >= 0) {
         return "Third field should be a positive number";
@@ -94,7 +94,7 @@ sub validate_asset {
 
 sub line_empty {
     my $line = shift;
-    return Froogle::Utils::FormattingUtils::trim($line) eq '';
+    return Froogle::Utils::Formatting::trim($line) eq '';
 }
 
 our @EXPORT_OK = qw(validate_file);

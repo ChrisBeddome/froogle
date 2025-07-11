@@ -1,4 +1,4 @@
-package Froogle::Utils::CurrencyUtils;
+package Froogle::Utils::Currency;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use warnings;
 use Exporter;
 
 use Froogle::Constants;
-use Froogle::Utils::DataUtils;
+use Froogle::Utils::Data;
 
 sub format_currency {
     my ($dollars, $width) = @_;
@@ -24,8 +24,8 @@ sub format_currency {
 sub format_debt_line {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // Froogle::Constants::COMBINED_CATEGORY_CODES()->{$transaction->{'category'}};
-    my $amount_owed = Froogle::Utils::DataUtils::amount_owed_for_transaction($transaction);
-    return who_owe_who_text($amount_owed) . "         " . Froogle::Utils::FormattingUtils::truncate_or_pad($desc, 30)  . "             " . Froogle::Utils::CurrencyUtils::format_currency(abs($amount_owed), 10);
+    my $amount_owed = Froogle::Utils::Data::amount_owed_for_transaction($transaction);
+    return who_owe_who_text($amount_owed) . "         " . Froogle::Utils::Formatting::truncate_or_pad($desc, 30)  . "             " . Froogle::Utils::Currency::format_currency(abs($amount_owed), 10);
 }
 
 sub who_owe_who_text {

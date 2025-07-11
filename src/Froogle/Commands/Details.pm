@@ -6,19 +6,19 @@ use warnings;
 use feature 'say';
 use Exporter;
 
-use Froogle::Utils::DataUtils;
-use Froogle::Utils::DateUtils;
-use Froogle::Utils::CurrencyUtils;
+use Froogle::Utils::Data;
+use Froogle::Utils::Date;
+use Froogle::Utils::Currency;
 
 sub name {
     return "details";
 }
 
 sub run {
-    my @transactions = Froogle::Utils::DataUtils::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions;
 
     say "";
-    say Froogle::Utils::DateUtils::formatted_date_range();
+    say Froogle::Utils::Date::formatted_date_range();
 
     foreach (@transactions) {
         my $transaction = $_;
@@ -32,7 +32,7 @@ sub run {
 sub print_transaction {
     my $transaction = shift;
     say "Date:           $transaction->{date}";
-    say "Amount:         " . Froogle::Utils::CurrencyUtils::format_currency($transaction->{amount});
+    say "Amount:         " . Froogle::Utils::Currency::format_currency($transaction->{amount});
     say "Category:       $transaction->{category}" unless $transaction->{type} eq "IN";
     say "Description:    $transaction->{desc}" if defined $transaction->{desc};
     say "Necessity:      " . format_necessity($transaction->{necessity}) unless $transaction->{type} eq "IN";

@@ -1,4 +1,4 @@
-package Froogle::Utils::FileUtils;
+package Froogle::Utils::File;
 
 use strict;
 use warnings;
