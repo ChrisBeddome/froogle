@@ -14,6 +14,19 @@ sub name {
     return "zz";
 }
 
+sub applicable_options {
+    return qw();
+}
+
+sub validate_options {
+    my %options = (@_);
+    return 1;
+}
+
+sub defaults {
+    return ();
+}
+
 sub run {
     my $owe_zz = 0;
     my @need_settling = ();

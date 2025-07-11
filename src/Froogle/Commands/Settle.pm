@@ -13,6 +13,19 @@ sub name {
     return "settle";
 }
 
+sub applicable_options {
+    return qw();
+}
+
+sub validate_options {
+    my %options = (@_);
+    return 1;
+}
+
+sub defaults {
+    return ();
+}
+
 sub run {
     my $user_confirmation = get_confirmation("Are you sure you want to mark all transactions as settled? (y/n):");
     return unless $user_confirmation;
