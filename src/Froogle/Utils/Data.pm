@@ -10,6 +10,7 @@ use Froogle::Constants;
 use Froogle::Validators::FileValidator;
 use Froogle::OptionsManager;
 use Froogle::Utils::Date;
+use Froogle::UserErrorHandler;
 
 sub split_line {
     my $line = shift;
@@ -23,7 +24,7 @@ sub get_transactions {
     if (@errors > 0) {
         report_errors(@errors);
         close($fh);
-        die "Data contains errors; Exiting."
+        Froogle::UserErrorHandler::raise("INVALID_DATA");
     }
 
     my @transactions = parse_file($fh);

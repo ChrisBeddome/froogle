@@ -5,6 +5,7 @@ use Exporter;
 
 use Froogle::Utils::Date;
 use Froogle::CommandDispatcher;
+use Froogle::UserErrorHandler;
 
 my $command;
 my $command_package;
@@ -14,6 +15,7 @@ sub initialize {
     my $args = shift;
     $command = command_from_args($args);
     $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
+    Froogle::UserErrorHandler::raise('COMMAND_NOT_FOUND') unless $command_package;
     %options = options_from_args($args);
     %options = combine_with_defaults(%options);
     validate_options(%options);
@@ -52,7 +54,7 @@ sub parse_options {
         'to|t=s'   => \$options{to},
         'necessity|n=i'   => \$options{necessity},
         'category|c=s'   => \$options{category}
-    ) or die "Error in command line arguments";
+    ) or Froogle::UserErrorHandler::raise("INVALID_OPTION");
 
     for my $key (keys %options) {
         delete $options{$key} unless defined $options{$key};
@@ -82,7 +84,7 @@ sub validate_options {
 
     for my $option ( grep { $_ ne 'command' } keys %options ) {
         if (defined $options{$option} && !grep { $_ eq $option } @applicable_options) {
-            die "Option '$option' not applicable to '${command}' command";
+            Froogle::UserErrorHandler::raise('INVALID_OPTION', "Option '$option' not applicable to '${command}' command");
         }
     }
 
@@ -92,42 +94,32 @@ sub validate_options {
         $command_specific_validations->(%options);
     }
 
-    # my %applicable_options = (
-    #     'help'=> ['command'],
-    #     'overview' => ['command', 'from', 'to'],
-    #     'list' => ['command', 'from', 'to', 'necessity', 'category'],
-    #     'details' => ['command', 'from', 'to', 'necessity', 'category'],
-    #     'cats' => ['command', 'from', 'to'],
-    #     'zz' => ['command'],
-    #     'settle' => ['command']
-    # );
-    
     run_general_validations(%options);
 }
 
 sub run_general_validations {
     my %options = @_;
 
-    if (defined $options{from} && $options{to}) {
-        if ($options{from} gt $options{to}) {
-            die "From date must be before to date";
-        }   
-    }
-
     if (defined $options{from} && !Froogle::Utils::Date::validate_date($options{from})) {
-        die "Invalid date format for 'from' option";
+        Froogle::UserErrorHandler::raise('INVALID_OPTION', "Invalid date format for 'from' option: $options{from}");
     }
 
     if (defined $options{to} && !Froogle::Utils::Date::validate_date($options{to})) {
-        die "Invalid date format for 'to' option";
+        Froogle::UserErrorHandler::raise('INVALID_OPTION', "Invalid date format for 'to' option: $options{to}");
+    }
+
+    if (defined $options{from} && $options{to}) {
+        if ($options{from} gt $options{to}) {
+            Froogle::UserErrorHandler::raise('INVALID_OPTION', "From date must be before to date");
+        }   
     }
 
     if (defined $options{necessity} && ($options{necessity} < 1 || $options{necessity} > 3)) {
-        die "Necessity must be 1, 2, or 3";
+        Froogle::UserErrorHandler::raise('INVALID_OPTION', "Necessity must be 1, 2, or 3");
     }
 
     if (defined $options{category} && !exists Froogle::Constants::COMBINED_CATEGORY_CODES()->{$options{category}}) {
-        die "Invalid category code";
+        Froogle::UserErrorHandler::raise('INVALID_OPTION', "Invalid category code: $options{category}");
     }
 }
 

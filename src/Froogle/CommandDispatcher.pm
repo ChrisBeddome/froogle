@@ -7,13 +7,15 @@ use Exporter;
 
 use Froogle::Constants;
 use Froogle::Utils::File;
+use Froogle::UserErrorHandler;
+
 
 my %command_package_mapping;
 
 sub run_command {
     my ($command, $options) = @_;
     my $package = get_package_from_command($command);
-    die "Command not found: $command, run froogle help to see list of available commands." unless $package;
+    Froogle::UserErrorHandler::raise('COMMAND_NOT_FOUND') unless $package;
     $package->run($options);
 }
 

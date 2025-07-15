@@ -5,13 +5,13 @@ use warnings;
 
 use Exporter;
 use Froogle::Utils::File;
-use Froogle::ErrorHandler;
+use Froogle::UserErrorHandler;
 
 use constant ENVIRONMENT => ($ENV{FROOGLE_ENV} // 'development');
 
 use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? path_from_project_root('test/data.txt') : ($ENV{BUDGET_DATA_FILE_PATH}) ;
 
-Froogle::ErrorHandler::raise('NO_DATA_FILE') unless DATA_FILE_PATH && -e DATA_FILE_PATH;
+Froogle::UserErrorHandler::raise('NO_DATA_FILE') unless DATA_FILE_PATH && -e DATA_FILE_PATH;
 
 use constant COMMAND_DIRECTORY => path_from_application_root('Commands');
 
@@ -60,6 +60,6 @@ use constant NECESSITY_CODES => {
     "3" => "Necessary"
 };
 
-our @EXPORT_OK = qw(DATA_FILE_PATH FILE_KEY_MAPPING OUT_CATEGORY_CODES IN_CATEGORY_CODES ASS_CATEGORY_CODES COMBINED_CATEGORY_CODES NECESSITY_CODES);
+our @EXPORT_OK = qw(DATA_FILE_PATH FILE_KEY_MAPPING OUT_CATEGORY_CODES IN_CATEGORY_CODES ASS_CATEGORY_CODES COMBINED_CATEGORY_CODES NECESSITY_CODES ENVIRONMENT);
 
 1;
