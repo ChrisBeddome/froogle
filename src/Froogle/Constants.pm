@@ -5,9 +5,14 @@ use warnings;
 
 use Exporter;
 use Froogle::Utils::File;
+use Froogle::ErrorHandler;
 
-# use constant DATA_FILE_PATH => $ENV{'BUDGET_DATA_FILE_PATH'};
-use constant DATA_FILE_PATH => path_from_project_root('/test/data.txt');
+use constant ENVIRONMENT => ($ENV{FROOGLE_ENV} // 'development');
+
+use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? path_from_project_root('test/data.txt') : ($ENV{BUDGET_DATA_FILE_PATH}) ;
+
+Froogle::ErrorHandler::raise('NO_DATA_FILE') unless DATA_FILE_PATH && -e DATA_FILE_PATH;
+
 use constant COMMAND_DIRECTORY => path_from_application_root('Commands');
 
 use constant FILE_KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
