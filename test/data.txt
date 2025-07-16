@@ -118,6 +118,7 @@
 2024-10-24 ; OUT ; 80.00 ; HOS ; Rent ; 3 ; -80.00 ; 1
 2024-10-24 ; OUT ; 40.00 ; PET ; Pet supplies ; 3 ; -40.00 ; 1
 2024-10-25 ; OUT ; 10.00 ; OTH ; Drinks ; 1 ; -10.00 ; 1
+2024-10-25 ; TRF ; 500.00 ; PAS ; buy stonks 
 2024-10-25 ; OUT ; 50.00 ; GRC ; Weekly groceries ; 3 ; -50.00 ; 1
 2024-10-26 ; OUT ; 70.00 ; HOS ; Electricity ; 3 ; -70.00 ; 1
 2024-10-26 ; OUT ; 25.00 ; DNG ; Coffee ; 2 ; -25.00 ; 1

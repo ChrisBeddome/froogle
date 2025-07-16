@@ -55,9 +55,9 @@ sub run {
         say "       $key: " . Froogle::Constants::OUT_CATEGORY_CODES()->{$key};
     }
     say "";
-    say "   Assets: ";
-    for my $key (sort keys %{Froogle::Constants::ASS_CATEGORY_CODES()}) {
-        say "       $key: " . Froogle::Constants::ASS_CATEGORY_CODES()->{$key};
+    say "   Transfers: ";
+    for my $key (sort keys %{Froogle::Constants::TRF_CATEGORY_CODES()}) {
+        say "       $key: " . Froogle::Constants::TRF_CATEGORY_CODES()->{$key};
     }
     say "";
     say "Examples: ";

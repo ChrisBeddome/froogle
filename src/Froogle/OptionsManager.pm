@@ -1,5 +1,8 @@
 package Froogle::OptionsManager;
 
+use strict;
+use warnings;
+
 use Getopt::Long qw(GetOptionsFromArray);
 use Exporter;
 

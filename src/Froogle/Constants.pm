@@ -42,16 +42,15 @@ use constant IN_CATEGORY_CODES => {
     'OTH' => 'Other',
 };
 
-use constant ASS_CATEGORY_CODES => {
-    'EQT' => 'Equities',
-    'RLS' => 'Real Estate',
-    'OTH' => 'Other'
+use constant TRF_CATEGORY_CODES => {
+    'PAS' => 'Purchase Asset',
+    'SAS' => 'Sell Asset',
 };
 
 use constant COMBINED_CATEGORY_CODES => {
     %{+OUT_CATEGORY_CODES},
     %{+IN_CATEGORY_CODES},
-    %{+ASS_CATEGORY_CODES},
+    %{+TRF_CATEGORY_CODES},
 };
 
 use constant NECESSITY_CODES => {
@@ -60,6 +59,6 @@ use constant NECESSITY_CODES => {
     "3" => "Necessary"
 };
 
-our @EXPORT_OK = qw(DATA_FILE_PATH FILE_KEY_MAPPING OUT_CATEGORY_CODES IN_CATEGORY_CODES ASS_CATEGORY_CODES COMBINED_CATEGORY_CODES NECESSITY_CODES ENVIRONMENT);
+our @EXPORT_OK = qw(DATA_FILE_PATH FILE_KEY_MAPPING OUT_CATEGORY_CODES IN_CATEGORY_CODES TRF_CATEGORY_CODES COMBINED_CATEGORY_CODES NECESSITY_CODES ENVIRONMENT);
 
 1;

@@ -34,7 +34,7 @@ sub defaults {
 sub run {
     my %spending = ("1" => 0, "2" => 0, "3" => 0);
     my $income = 0;
-    my $assets = 0;
+    my $transfers = 0;
 
     my @transactions = Froogle::Utils::Data::get_transactions;
 
@@ -42,15 +42,15 @@ sub run {
         my $transaction = $_;
         if ($transaction->{type} eq "IN") { 
             $income += $transaction->{amount};
-        } elsif ($transaction->{type} eq "ASS") {
-            $assets += $transaction->{amount};
+        } elsif ($transaction->{type} eq "TRF") {
+            $transfers += $transaction->{amount};
         } else {
             $spending{$transaction->{necessity}} += $transaction->{amount};
         }
     }
 
     my $income_str = Froogle::Utils::Currency::format_currency($income, 10);
-    my $assets_str = Froogle::Utils::Currency::format_currency($assets, 10);
+    my $transfer_str = Froogle::Utils::Currency::format_currency($transfers, 10);
     my $necessary = Froogle::Utils::Currency::format_currency($spending{'3'}, 10);
     my $unnecessary = Froogle::Utils::Currency::format_currency($spending{'2'}, 10);
     my $frivilous = Froogle::Utils::Currency::format_currency($spending{'1'}, 10);
@@ -60,14 +60,14 @@ sub run {
     say "";
     say "Total Income:                   $income_str";
     say "";
-    say "Transfer to assets:             $assets_str";    
+    say "Transfers:                      $transfer_str";    
     say "";
     say "Necessary spending:             $necessary";
     say "Unnecessary spending:           $unnecessary";
     say "Frivolous spending:             $frivilous";
     say "Total Spending:                 " . Froogle::Utils::Currency::format_currency(sum(values %spending), 10);
     say "";
-    say "Net                             " . Froogle::Utils::Currency::format_currency($income - sum(values %spending) - $assets, 10);
+    say "Net                             " . Froogle::Utils::Currency::format_currency($income - sum(values %spending), 10);
     say "";
 }
 

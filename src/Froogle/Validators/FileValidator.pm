@@ -42,8 +42,8 @@ sub validate_line {
         return validate_income(@fields);
     } elsif ($fields[1] eq "OUT") {
         return validate_expense(@fields);
-    } elsif ($fields[1] eq "ASS") {
-        return validate_asset(@fields);
+    } elsif ($fields[1] eq "TRF") {
+        return validate_transfer(@fields);
     }
 
     return "Invalid transaction type";
@@ -84,11 +84,11 @@ sub validate_expense {
     return undef;
 }
 
-sub validate_asset {
+sub validate_transfer {
     my (@fields) = @_;
 
     return "Invalid number of fields" unless @fields >= 3 && @fields <= 5;
-    return "Invalid category code" unless exists Froogle::Constants::ASS_CATEGORY_CODES()->{$fields[3]};
+    return "Invalid category code" unless exists Froogle::Constants::TRF_CATEGORY_CODES()->{$fields[3]};
     return undef;
 }
 
