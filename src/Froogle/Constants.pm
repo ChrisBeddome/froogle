@@ -17,6 +17,8 @@ use constant COMMAND_DIRECTORY => path_from_application_root('Commands');
 
 use constant FILE_KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 
+use constant DEFAULT_COMMAND => 'overview';
+
 use constant OUT_CATEGORY_CODES => {
     'GRC' => 'Groceries',
     'DNG' => 'Dining',
