@@ -52,7 +52,7 @@ sub package_name_from_file {
     return undef;
 }
 
-our @EXPORT = qw(package_name_from_file path_from_project_root path_from_application_root);
+our @EXPORT_OK = qw(package_name_from_file path_from_project_root path_from_application_root);
 
 1;
 

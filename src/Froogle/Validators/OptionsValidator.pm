@@ -3,10 +3,12 @@ package Froogle::Validators::OptionsValidator;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
-use Froogle::UserErrorHandler;
-use Froogle::CommandDispatcher;
+use Froogle::Constants ();
+use Froogle::Utils::Date ();
+use Froogle::UserErrorHandler ();
+use Froogle::CommandDispatcher ();
 
 sub run_validations {
     my ($command, %options) = @_;

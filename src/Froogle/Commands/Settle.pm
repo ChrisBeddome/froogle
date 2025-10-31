@@ -4,10 +4,10 @@ use strict;
 use warnings;
 
 use feature 'say';
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Utils::Data;
+use Froogle::Constants ();
+use Froogle::Utils::Data ();
 
 sub name {
     return "settle";

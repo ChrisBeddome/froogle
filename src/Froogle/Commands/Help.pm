@@ -4,9 +4,9 @@ use strict;
 use warnings;
 
 use feature 'say';
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
+use Froogle::Constants ();
 
 sub name {
     return "help";

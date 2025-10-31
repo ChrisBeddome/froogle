@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 use feature 'say';
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Utils::Data;
-use Froogle::Utils::Currency;
+use Froogle::Constants ();
+use Froogle::Utils::Data ();
+use Froogle::Utils::Currency ();
 
 sub name {
     return "zz";

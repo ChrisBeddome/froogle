@@ -3,10 +3,10 @@ package Froogle::Main;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
-use Froogle::OptionsManager;
-use Froogle::CommandDispatcher;
+use Froogle::OptionsManager ();
+use Froogle::CommandDispatcher ();
 
 sub run {
     Froogle::OptionsManager::initialize(\@ARGV);

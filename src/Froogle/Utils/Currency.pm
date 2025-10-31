@@ -3,10 +3,11 @@ package Froogle::Utils::Currency;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Utils::Data;
+use Froogle::Constants ();
+use Froogle::Utils::Data ();
+use Froogle::Utils::Formatting ();
 
 sub format_currency {
     my ($dollars, $width) = @_;

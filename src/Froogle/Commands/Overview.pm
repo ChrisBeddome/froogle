@@ -5,11 +5,11 @@ use warnings;
 
 use feature 'say';
 use List::Util qw(sum);
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Utils::Data;
-use Froogle::Utils::Date;
-use Froogle::Utils::Currency;
+use Froogle::Utils::Data ();
+use Froogle::Utils::Date ();
+use Froogle::Utils::Currency ();
 
 sub name {
     return "overview";

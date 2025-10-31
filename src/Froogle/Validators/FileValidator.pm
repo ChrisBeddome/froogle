@@ -3,12 +3,12 @@ package Froogle::Validators::FileValidator;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Utils::Date;
-use Froogle::Utils::Data;
-use Froogle::Utils::Formatting;
+use Froogle::Constants ();
+use Froogle::Utils::Date ();
+use Froogle::Utils::Data ();
+use Froogle::Utils::Formatting ();
 
 sub validate_file {
     my $fh = shift;

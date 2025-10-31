@@ -3,7 +3,7 @@ package Froogle::Utils::Formatting;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
 sub truncate_or_pad {
     my ($input, $length, $pad_left) = @_;

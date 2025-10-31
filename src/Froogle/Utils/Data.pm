@@ -4,13 +4,14 @@ use strict;
 use warnings;
 
 use feature 'say';
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Validators::FileValidator;
-use Froogle::OptionsManager;
-use Froogle::Utils::Date;
-use Froogle::UserErrorHandler;
+use Froogle::Constants ();
+use Froogle::Validators::FileValidator ();
+use Froogle::OptionsManager ();
+use Froogle::Utils::Date ();
+use Froogle::Utils::Formatting ();
+use Froogle::UserErrorHandler ();
 
 sub split_line {
     my $line = shift;

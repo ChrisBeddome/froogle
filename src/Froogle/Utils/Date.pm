@@ -3,7 +3,7 @@ package Froogle::Utils::Date;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
 sub validate_date {
     my ($date) = @_;

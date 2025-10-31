@@ -4,12 +4,12 @@ use strict;
 use warnings;
 
 use Getopt::Long qw(GetOptionsFromArray);
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Utils::Date;
-use Froogle::CommandDispatcher;
-use Froogle::UserErrorHandler;
-use Froogle::Validators::OptionsValidator;
+use Froogle::Utils::Date ();
+use Froogle::CommandDispatcher ();
+use Froogle::UserErrorHandler ();
+use Froogle::Validators::OptionsValidator ();
 
 my $command;
 my $command_package;

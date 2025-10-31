@@ -3,17 +3,17 @@ package Froogle::Constants;
 use strict;
 use warnings;
 
-use Exporter;
-use Froogle::Utils::File;
-use Froogle::UserErrorHandler;
+use Exporter 'import';
+use Froogle::Utils::File ();
+use Froogle::UserErrorHandler ();
 
 use constant ENVIRONMENT => ($ENV{FROOGLE_ENV} // 'development');
 
-use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? path_from_project_root('test/data.txt') : ($ENV{BUDGET_DATA_FILE_PATH}) ;
+use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? Froogle::Utils::File::path_from_project_root('test/data.txt') : ($ENV{BUDGET_DATA_FILE_PATH}) ;
 
 Froogle::UserErrorHandler::raise('NO_DATA_FILE') unless DATA_FILE_PATH && -e DATA_FILE_PATH;
 
-use constant COMMAND_DIRECTORY => path_from_application_root('Commands');
+use constant COMMAND_DIRECTORY => Froogle::Utils::File::path_from_application_root('Commands');
 
 use constant FILE_KEY_MAPPING => qw(date type amount category desc necessity owe_zz settled);
 

@@ -5,13 +5,13 @@ use warnings;
 
 use feature 'say';
 use List::Util qw(sum);
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Utils::Data;
-use Froogle::Utils::Date;
-use Froogle::Utils::Currency;
-use Froogle::Utils::Formatting;
+use Froogle::Constants ();
+use Froogle::Utils::Data ();
+use Froogle::Utils::Date ();
+use Froogle::Utils::Currency ();
+use Froogle::Utils::Formatting ();
 
 sub name {
     return "cats";

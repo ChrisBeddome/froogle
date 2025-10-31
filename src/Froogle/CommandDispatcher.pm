@@ -3,11 +3,11 @@ package Froogle::CommandDispatcher;
 use strict;
 use warnings;
 
-use Exporter;
+use Exporter 'import';
 
-use Froogle::Constants;
-use Froogle::Utils::File;
-use Froogle::UserErrorHandler;
+use Froogle::Constants ();
+use Froogle::Utils::File ();
+use Froogle::UserErrorHandler ();
 
 
 my %command_package_mapping;
