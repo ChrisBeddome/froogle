@@ -68,8 +68,8 @@ sub run {
     say "";
     say "Total Income:                   $income_str";
     say "";
-    say "Purchase Assets (PAS):          $pas_str";
-    say "Sell Assets (SAS):              $sas_str";
+    say "Purchase Assets:                $pas_str";
+    say "Sell Assets:                    $sas_str";
     say "Net Transfers:                  $net_transfers_str";
     say "";
     say "Necessary spending:             $necessary";
