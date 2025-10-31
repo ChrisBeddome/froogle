@@ -22,6 +22,7 @@ sub run_validations {
         }
     }
 
+    #current unused by any package
     my $command_specific_validations = $command_package->can('validate_options');
 
     if ($command_specific_validations) {

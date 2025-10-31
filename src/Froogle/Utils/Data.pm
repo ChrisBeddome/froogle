@@ -81,9 +81,8 @@ sub filter_transactions {
     my @transactions = @_;
     my @filtered_transactions = ();
 
-    foreach (@transactions) {
-        my $transaction = $_;
-        if ($transaction->{type} ne "OUT") {
+    foreach my $transaction (@transactions) {
+        if ($transaction->{type} ne Froogle::Constants::TRANSACTION_TYPE_EXPENSE()) {
             next if grep { $command eq $_ } qw(list details zz);
         }
         if (defined $options{from} && defined $options{to}) {
@@ -114,9 +113,9 @@ sub amount_owed_for_transaction {
     if (is_unsettled($transaction)) {
         my $owe_zz = 0;
         my $amount_owed = $transaction->{owe_zz};
-        if ($amount_owed eq "HALF") {
+        if ($amount_owed eq Froogle::Constants::SPECIAL_VALUE_HALF()) {
             $owe_zz += $transaction->{amount};
-        } elsif ($amount_owed eq "-HALF") {
+        } elsif ($amount_owed eq Froogle::Constants::SPECIAL_VALUE_NEGATIVE_HALF()) {
             $owe_zz -= $transaction->{amount};
         } else {
             $owe_zz += $amount_owed;
@@ -126,12 +125,46 @@ sub amount_owed_for_transaction {
     return 0;
 }
 
+sub total_income_for_transactions {
+    my @transactions = @_;
+    my $total = 0;
+    foreach my $transaction (@transactions) {
+        if ($transaction->{type} eq Froogle::Constants::TRANSACTION_TYPE_INCOME()) {
+            $total += $transaction->{amount};
+        }
+    }
+    return $total;
+}
+
+sub encode_transaction {
+    my $record = shift;
+    my @keys = Froogle::Constants::FILE_KEY_MAPPING();
+    my @values = ();
+    for my $key (@keys) {
+        my $val = $record->{$key};
+        $val = '' if !defined $val;
+        push @values, $val;
+    }
+    my $line = join(' ; ', @values);
+    $line =~ s/[ ;]+$//;  # Remove any combination of whitespace and semicolons from the end
+    return $line;
+}
+
+sub write_transactions_to_file {
+    my @transactions = @_;
+    open my $fh, '>', Froogle::Constants::DATA_FILE_PATH() or die "Could not open output file: $!";
+    foreach my $transaction (@transactions) {
+        print $fh encode_transaction($transaction) . "\n";
+    }
+    close $fh;
+}
+
 sub line_empty {
     my $line = shift;
     return Froogle::Utils::Formatting::trim($line) eq '';
 }
 
 
-our @EXPORT_OK = qw(split_line get_transactions is_unsettled amount_owed_for_transaction);
+our @EXPORT_OK = qw(split_line get_transactions is_unsettled amount_owed_for_transaction total_income_for_transactions encode_transaction write_transactions_to_file);
 
 1;

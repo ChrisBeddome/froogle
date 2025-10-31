@@ -19,11 +19,6 @@ sub applicable_options {
     return qw(from to necessity category);
 }
 
-sub validate_options {
-    my %options = (@_);
-    return 1;
-}
-
 sub defaults {
     return (
         to => Froogle::Utils::Date::get_today(),
@@ -48,8 +43,7 @@ sub run {
 sub print_transaction {
     my $transaction = shift;
     my $desc = $transaction->{'desc'} // Froogle::Constants::COMBINED_CATEGORY_CODES()->{$transaction->{'category'}};
-    my $amount = Froogle::Utils::Currency::format_currency($transaction->{amount}, 10);
-    my $type = $transaction->{type};
+    my $amount = Froogle::Utils::Currency::format_currency($transaction->{amount}, Froogle::Constants::CURRENCY_FORMAT_WIDTH());
     say "$amount on $transaction->{date} for $desc";
 }
 

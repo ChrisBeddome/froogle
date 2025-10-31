@@ -19,11 +19,6 @@ sub applicable_options {
     return qw(from to necessity category);
 }
 
-sub validate_options {
-    my %options = (@_);
-    return 1;
-}
-
 sub defaults {
     return (
         to => Froogle::Utils::Date::get_today(),

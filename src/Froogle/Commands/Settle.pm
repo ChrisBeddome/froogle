@@ -17,11 +17,6 @@ sub applicable_options {
     return qw();
 }
 
-sub validate_options {
-    my %options = (@_);
-    return 1;
-}
-
 sub defaults {
     return ();
 }
@@ -33,14 +28,13 @@ sub run {
     my @transactions = Froogle::Utils::Data::get_transactions();
     backup_file();
 
-    foreach (@transactions) {
-        my $transaction = $_;
+    foreach my $transaction (@transactions) {
         if (Froogle::Utils::Data::is_unsettled($transaction)) {
             $transaction->{settled} = 1;
         }
     }
 
-    write_file(@transactions);
+    Froogle::Utils::Data::write_transactions_to_file(@transactions);
 
     say "";
     say "All outstanding shared transactions have been marked as settled";
@@ -58,20 +52,6 @@ sub get_confirmation {
     return lc($response) eq 'y' ? 1 : 0;
 }
 
-sub encode_transaction {
-    my $record = shift;
-    my @keys = Froogle::Constants::FILE_KEY_MAPPING();
-    my @values = ();
-    for my $key (@keys) {
-        my $val = $record->{$key};
-        $val = '' if !defined $val;
-        push @values, $val;
-    }
-    my $line = join(' ; ', @values);
-    $line =~ s/[ ;]+$//;  # Remove any combination of whitespace and semicolons from the end
-    return $line;
-}
-
 sub backup_file {
     my $file = Froogle::Constants::DATA_FILE_PATH();
     my $backup_file = $file . '.bak';
@@ -79,20 +59,6 @@ sub backup_file {
     rename $file, $backup_file or die "Could not backup file: $!";
 }
 
-sub write_file {
-    my @transactions = @_;
-    open my $fh, '>', Froogle::Constants::DATA_FILE_PATH() or die "Could not open output file: $!";
-    foreach (@transactions) {
-        my $transaction = $_;
-        print $fh encode_transaction($transaction) . "\n";
-    }
-    close $fh;
-}
-
-sub is_empty {
-    my ($string) = @_;
-    return $string =~ /^\s*$/ ? 1 : 0;
-}
 
 our @EXPORT_OK = qw(name run);
 
