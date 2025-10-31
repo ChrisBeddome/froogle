@@ -52,10 +52,10 @@ sub run {
     my $total_income = total_income_for_transactions(@transactions);
 
     my @sorted_keys = sort { $spending_per_categories{$b} <=> $spending_per_categories{$a} } keys %spending_per_categories;
-    say "Category                              Amount    Percentage (spending)    Percentage (income)";
-    say "=" x 92;
+    say "Category                                    Amount    Percentage (spending)    Percentage (income)";
+    say "=" x 98;
     for my $key (@sorted_keys) {
-        my $cat_text = Froogle::Utils::Formatting::truncate_or_pad(Froogle::Constants::OUT_CATEGORY_CODES()->{$key}, 30);
+        my $cat_text = Froogle::Utils::Formatting::truncate_or_pad(Froogle::Constants::OUT_CATEGORY_CODES()->{$key}, 36);
         my $percentage_of_spending = $total_spending > 0 ? $spending_per_categories{$key} / $total_spending * 100 : 0;
         my $percentage_of_income = $total_income > 0 ? $spending_per_categories{$key} / $total_income * 100 : 0;
         my $percentage_of_spending_text = Froogle::Utils::Formatting::format_percentage($percentage_of_spending);
