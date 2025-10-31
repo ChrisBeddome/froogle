@@ -3,7 +3,7 @@ Analytics for personal finances
 
 ## Usage ##
 
-set ENV variable `BUDGET_DATA_FILE_PATH` to a text file that adheres to the below format
+set ENV variable `FROOGLE_DATA_FILE_PATH` to a text file that adheres to the below format
 
 run `froogle help` to view options
 

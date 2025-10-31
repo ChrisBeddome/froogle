@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long qw(GetOptionsFromArray);
 use Exporter 'import';
 
-use Froogle::Utils::Date ();
+use Froogle::Constants ();
 use Froogle::CommandDispatcher ();
 use Froogle::UserErrorHandler ();
 use Froogle::Validators::OptionsValidator ();

@@ -7,7 +7,7 @@ use warnings;
 
 my %error_messages = (
     COMMAND_NOT_FOUND => "Command not found. Run 'froogle help' to see list of available commands.",
-    NO_DATA_FILE => "Could not found data file at given location. Please check that the file exists and is properly setup in the env var BUDGET_DATA_FILE_PATH",
+    NO_DATA_FILE => "Could not found data file at given location. Please check that the file exists and is properly setup in the env var FROOGLE_DATA_FILE_PATH",
     INVALID_DATA => "Invalid data found, Run 'froogle help' for syntax options",
     INVALID_OPTION => "Options invalid"
 );

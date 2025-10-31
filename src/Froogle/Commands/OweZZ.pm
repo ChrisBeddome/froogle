@@ -6,7 +6,6 @@ use warnings;
 use feature 'say';
 use Exporter 'import';
 
-use Froogle::Constants ();
 use Froogle::Utils::Data ();
 use Froogle::Utils::Currency ();
 

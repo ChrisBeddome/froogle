@@ -9,7 +9,7 @@ use Froogle::UserErrorHandler ();
 
 use constant ENVIRONMENT => ($ENV{FROOGLE_ENV} // 'development');
 
-use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? Froogle::Utils::File::path_from_project_root('test/data.txt') : ($ENV{BUDGET_DATA_FILE_PATH}) ;
+use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? Froogle::Utils::File::path_from_project_root('test/data.txt') : ($ENV{FROOGLE_DATA_FILE_PATH}) ;
 
 Froogle::UserErrorHandler::raise('NO_DATA_FILE') unless DATA_FILE_PATH && -e DATA_FILE_PATH;
 
