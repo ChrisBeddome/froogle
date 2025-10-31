@@ -34,23 +34,31 @@ sub defaults {
 sub run {
     my %spending = ("1" => 0, "2" => 0, "3" => 0);
     my $income = 0;
-    my $transfers = 0;
+    my $pas_transfers = 0;
+    my $sas_transfers = 0;
 
     my @transactions = Froogle::Utils::Data::get_transactions;
 
     foreach (@transactions) {
         my $transaction = $_;
-        if ($transaction->{type} eq "IN") { 
+        if ($transaction->{type} eq "IN") {
             $income += $transaction->{amount};
         } elsif ($transaction->{type} eq "TRF") {
-            $transfers += $transaction->{amount};
+            if ($transaction->{category} eq "PAS") {
+                $pas_transfers += $transaction->{amount};
+            } elsif ($transaction->{category} eq "SAS") {
+                $sas_transfers += $transaction->{amount};
+            }
         } else {
             $spending{$transaction->{necessity}} += $transaction->{amount};
         }
     }
 
     my $income_str = Froogle::Utils::Currency::format_currency($income, 10);
-    my $transfer_str = Froogle::Utils::Currency::format_currency($transfers, 10);
+    my $pas_str = Froogle::Utils::Currency::format_currency($pas_transfers, 10);
+    my $sas_str = Froogle::Utils::Currency::format_currency($sas_transfers, 10);
+    my $net_transfers = $pas_transfers - $sas_transfers;
+    my $net_transfers_str = Froogle::Utils::Currency::format_currency($net_transfers, 10);
     my $necessary = Froogle::Utils::Currency::format_currency($spending{'3'}, 10);
     my $unnecessary = Froogle::Utils::Currency::format_currency($spending{'2'}, 10);
     my $frivilous = Froogle::Utils::Currency::format_currency($spending{'1'}, 10);
@@ -60,7 +68,9 @@ sub run {
     say "";
     say "Total Income:                   $income_str";
     say "";
-    say "Transfers:                      $transfer_str";    
+    say "Purchase Assets (PAS):          $pas_str";
+    say "Sell Assets (SAS):              $sas_str";
+    say "Net Transfers:                  $net_transfers_str";
     say "";
     say "Necessary spending:             $necessary";
     say "Unnecessary spending:           $unnecessary";
