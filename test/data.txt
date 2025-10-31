@@ -124,7 +124,7 @@
 2024-10-26 ; OUT ; 25.00 ; DNG ; Coffee ; 2 ; -25.00 ; 1
 2024-10-27 ; OUT ; 14.00 ; GRC ; Bread ; 3 ; -14.00 ; 1
 2024-10-27 ; OUT ; 35.00 ; PET ; Cat food ; 3 ; -35.00 ; 1
-2024-10-28 ; OUT ; 90.00 ; TRP ; Car insurance ; 3 ; -90.00 ; 1
+2024-10-28 ; OUT ; 90.00 ; REC ; Car insurance ; 3 ; -90.00 ; 1
 2024-10-28 ; OUT ; 50.00 ; OTH ; Miscellaneous items ; 2 ; -50.00 ; 1
 2024-10-29 ; OUT ; 55.00 ; SRV ; Internet bill ; 3 ; -55.00 ; 1
 2024-10-30 ; OUT ; 120.00 ; HOS ; Rent ; 3 ; -120.00 ; 1
