@@ -118,12 +118,13 @@
 2024-10-24 ; OUT ; 80.00 ; HOS ; Rent ; 3 ; -80.00 ; 1
 2024-10-24 ; OUT ; 40.00 ; PET ; Pet supplies ; 3 ; -40.00 ; 1
 2024-10-25 ; OUT ; 10.00 ; OTH ; Drinks ; 1 ; -10.00 ; 1
+2024-10-25 ; TRF ; 500.00 ; PAS ; buy stonks 
 2024-10-25 ; OUT ; 50.00 ; GRC ; Weekly groceries ; 3 ; -50.00 ; 1
 2024-10-26 ; OUT ; 70.00 ; HOS ; Electricity ; 3 ; -70.00 ; 1
 2024-10-26 ; OUT ; 25.00 ; DNG ; Coffee ; 2 ; -25.00 ; 1
 2024-10-27 ; OUT ; 14.00 ; GRC ; Bread ; 3 ; -14.00 ; 1
 2024-10-27 ; OUT ; 35.00 ; PET ; Cat food ; 3 ; -35.00 ; 1
-2024-10-28 ; OUT ; 90.00 ; TRP ; Car insurance ; 3 ; -90.00 ; 1
+2024-10-28 ; OUT ; 90.00 ; REC ; Car insurance ; 3 ; -90.00 ; 1
 2024-10-28 ; OUT ; 50.00 ; OTH ; Miscellaneous items ; 2 ; -50.00 ; 1
 2024-10-29 ; OUT ; 55.00 ; SRV ; Internet bill ; 3 ; -55.00 ; 1
 2024-10-30 ; OUT ; 120.00 ; HOS ; Rent ; 3 ; -120.00 ; 1
@@ -132,7 +133,7 @@
 2024-11-01 ; OUT ; 12.00 ; DNG ; Snack ; 2 ; -12.00 ; 1
 2024-11-02 ; IN ; 5000 ; SAL ; Salary
 2024-11-02 ; OUT ; 30.00 ; PET ; Pet food ; 3 ; -30.00 ; 1
-2024-11-03 ; OUT ; 45.00 ; HOS ; Utilities ; 3 ; -45.00 ; 0
-2024-11-03 ; OUT ; 25.00 ; OTH ; Personal care ; 2 ; -25.00 ; 0
-2024-11-04 ; OUT ; 80.00 ; GRC ; Weekly shopping ; 3 ; -80.00 ; 0
-2024-11-04 ; OUT ; 15.00 ; CLT ; Accessories ; 2 ; -15.00 ; 0
+2024-11-03 ; OUT ; 45.00 ; HOS ; Utilities ; 3 ; -45.00 ; 1
+2024-11-03 ; OUT ; 25.00 ; OTH ; Personal care ; 2 ; -25.00 ; 1
+2024-11-04 ; OUT ; 80.00 ; GRC ; Weekly shopping ; 3 ; -80.00 ; 1
+2024-11-04 ; OUT ; 15.00 ; CLT ; Accessories ; 2 ; -15.00 ; 1

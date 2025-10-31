@@ -7,4 +7,11 @@ fi
 
 script_dir="$(dirname "$(realpath "$0")")"
 
-FROOGLE_ENV=production pp -x -c "$script_dir/../src/run.pl" -o "$script_dir/../froogle"
+# Set environment to production in config file
+echo "production" > "$script_dir/../src/environment.conf"
+
+# Bundle with the config file included
+pp -x -c -a "$script_dir/../src/environment.conf;environment.conf" "$script_dir/../src/run.pl" -o "$script_dir/../froogle"
+
+# Restore to development for local development
+echo "development" > "$script_dir/../src/environment.conf"

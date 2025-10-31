@@ -7,11 +7,44 @@ use Exporter 'import';
 use Froogle::Utils::File ();
 use Froogle::UserErrorHandler ();
 
-use constant ENVIRONMENT => ($ENV{FROOGLE_ENV} // 'development');
+sub ENVIRONMENT {
+    # Check if we're running from a PAR bundle
+    if ($ENV{PAR_TEMP}) {
+        my $conf_path = "$ENV{PAR_TEMP}/inc/environment.conf";
+        if (-f $conf_path) {
+            open my $fh, '<', $conf_path or return 'development';
+            my $env = <$fh>;
+            close $fh;
+            chomp $env if defined $env;
+            return $env || 'development';
+        }
+    }
 
-use constant DATA_FILE_PATH => (ENVIRONMENT eq 'development') ? Froogle::Utils::File::path_from_project_root('test/data.txt') : ($ENV{FROOGLE_DATA_FILE_PATH}) ;
+    # Running from source - read from src/environment.conf
+    my $conf_path = Froogle::Utils::File::path_from_application_root('environment.conf');
+    if (-f $conf_path) {
+        open my $fh, '<', $conf_path or return 'development';
+        my $env = <$fh>;
+        close $fh;
+        chomp $env if defined $env;
+        return $env || 'development';
+    }
 
-Froogle::UserErrorHandler::raise('NO_DATA_FILE') unless DATA_FILE_PATH && -e DATA_FILE_PATH;
+    # Fallback to environment variable or default
+    return $ENV{FROOGLE_ENV} || 'development';
+}
+
+sub DATA_FILE_PATH {
+    my $path = (ENVIRONMENT() eq 'development')
+        ? Froogle::Utils::File::path_from_project_root('test/data.txt')
+        : $ENV{FROOGLE_DATA_FILE_PATH};
+
+    unless ($path) {
+        Froogle::UserErrorHandler::raise('NO_DATA_FILE', "Environment variable FROOGLE_DATA_FILE_PATH is not set");
+    }
+
+    return $path;
+}
 
 use constant COMMAND_DIRECTORY => Froogle::Utils::File::path_from_application_root('Commands');
 

@@ -5,7 +5,8 @@ use warnings;
 
 use Exporter 'import';
 use Cwd 'abs_path';
-use File::Basename; 
+use File::Basename;
+use File::Spec;
 
 sub path_from_project_root {
     my $filepath = shift;
@@ -20,10 +21,18 @@ sub path_from_application_root {
 }
 
 sub project_root {
+    # When running under PAR, use the directory where the executable is located
+    if ($ENV{PAR_TEMP}) {
+        return abs_path(dirname($ENV{PAR_PROGNAME} || $0));
+    }
     return find_dir_from_root("froogle");
 }
 
 sub application_root {
+    # When running under PAR, modules are in $PAR_TEMP/inc/lib
+    if ($ENV{PAR_TEMP}) {
+        return File::Spec->catdir($ENV{PAR_TEMP}, 'inc', 'lib', 'Froogle');
+    }
     return find_dir_from_root("Froogle");
 }
 
