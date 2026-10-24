@@ -16,7 +16,7 @@ sub run_validations {
     my $command_package = Froogle::CommandDispatcher::get_package_from_command($command);
     my @applicable_options = $command_package->applicable_options();
 
-    for my $option ( grep { $_ ne 'command' } keys %options ) {
+    for my $option ( grep { $_ ne 'command' } sort keys %options ) {
         if (defined $options{$option} && !grep { $_ eq $option } @applicable_options) {
             Froogle::UserErrorHandler::raise('INVALID_OPTION', "Option '$option' not applicable to '${command}' command");
         }
