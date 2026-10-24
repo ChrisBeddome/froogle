@@ -25,7 +25,8 @@ sub project_root {
     if ($ENV{PAR_TEMP}) {
         return abs_path(dirname($ENV{PAR_PROGNAME} || $0));
     }
-    return find_dir_from_root("froogle");
+    # The application root is <project root>/src/Froogle
+    return dirname(dirname(application_root()));
 }
 
 sub application_root {
@@ -33,25 +34,15 @@ sub application_root {
     if ($ENV{PAR_TEMP}) {
         return File::Spec->catdir($ENV{PAR_TEMP}, 'inc', 'lib', 'Froogle');
     }
-    return find_dir_from_root("Froogle");
-}
-
-sub find_dir_from_root {
-    my $dirname = shift;
-    my $filepath = abs_path(__FILE__);
-
-    my $pos = index($filepath, $dirname);
-    if ($pos != -1) {
-        return substr($filepath, 0, $pos + length($dirname));
-    } else {
-        die "Directory not found: $dirname"
-    }
+    # This file is <application root>/Utils/File.pm
+    return dirname(dirname(abs_path(__FILE__)));
 }
 
 sub package_name_from_file {
     my $filepath = shift;
 
-    if ($filepath =~ m{(.*?/Froogle)}s) {
+    # Match the last Froogle directory, in case an ancestor directory has the same name
+    if ($filepath =~ m{(.*/Froogle)(?=[/\\])}s) {
         my $modified_path = $';
         $modified_path =~ s/\.pm$//;
         $modified_path =~ s{[/\\]}{::}g;
