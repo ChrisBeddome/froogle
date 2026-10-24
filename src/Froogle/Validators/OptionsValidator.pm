@@ -35,11 +35,11 @@ sub run_validations {
 sub run_general_validations {
     my %options = @_;
 
-    if (defined $options{from} && !Froogle::Utils::Date::validate_date($options{from})) {
+    if (defined $options{from} && !Froogle::Utils::Date::validate_option_date($options{from})) {
         Froogle::UserErrorHandler::raise('INVALID_OPTION', "Invalid date format for 'from' option: $options{from}");
     }
 
-    if (defined $options{to} && !Froogle::Utils::Date::validate_date($options{to})) {
+    if (defined $options{to} && !Froogle::Utils::Date::validate_option_date($options{to})) {
         Froogle::UserErrorHandler::raise('INVALID_OPTION', "Invalid date format for 'to' option: $options{to}");
     }
 
