@@ -5,7 +5,6 @@ use warnings;
 
 use feature 'say';
 use Cwd ();
-use File::Copy ();
 use File::Temp ();
 use IO::Handle ();
 use Exporter 'import';
@@ -34,10 +33,13 @@ sub run {
 
     # Resolve symlinks so the file they point to is updated rather than replaced
     my $file = Cwd::abs_path(Froogle::Constants::DATA_FILE_PATH());
-    my @lines = map { Froogle::Utils::Data::settle_line($_) } read_lines($file);
+    my @file_info = stat($file) or die "Could not read $file: $!";
+    my $mode = $file_info[2] & 07777;  # permission bits, kept for the backup and the new file
+    my @original_lines = read_lines($file);
+    my @settled_lines = map { Froogle::Utils::Data::settle_line($_) } @original_lines;
 
-    backup_file($file);
-    write_lines_atomically($file, @lines);
+    write_lines_atomically($file . '.bak', $mode, @original_lines);
+    write_lines_atomically($file, $mode, @settled_lines);
 
     say "";
     say "All outstanding shared transactions have been marked as settled";
@@ -64,19 +66,15 @@ sub read_lines {
     return @lines;
 }
 
-sub backup_file {
-    my $file = shift;
-    File::Copy::copy($file, $file . '.bak') or die "Could not backup file: $!";
-}
-
-# Writes to a temporary file beside $file and renames it into place,
-# so $file is never left partially written
+# Writes to a temporary file beside $file and renames it into place, so $file is
+# never left partially written. The rename replaces whatever is at $file (even a
+# symlink or a read-only file) rather than writing through it
 sub write_lines_atomically {
-    my ($file, @lines) = @_;
+    my ($file, $mode, @lines) = @_;
     my $temp = File::Temp->new(TEMPLATE => "$file.XXXXXX");  # removed on failure
     print $temp @lines or die "Could not write $temp: $!";
     $temp->flush and $temp->sync or die "Could not write $temp: $!";
-    chmod((stat $file)[2] & 07777, $temp->filename) or die "Could not set permissions on $temp: $!";
+    chmod($mode, $temp->filename) or die "Could not set permissions on $temp: $!";
     rename $temp->filename, $file or die "Could not replace $file: $!";
 }
 
