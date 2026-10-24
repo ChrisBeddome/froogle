@@ -7,30 +7,10 @@ use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Utils::Date ();
-use Froogle::Utils::Data ();
-use Froogle::Utils::Formatting ();
 
-sub validate_file {
-    my $fh = shift;
-    my @errors = ();
-
-    while (my $line = <$fh>) {
-        chomp $line;
-        my $error = validate_line($line);
-        if ($error) {
-            push(@errors, {line => $., message => $error}); 
-        }
-    }
-
-    seek($fh, 0, 0) or die "Could not seek: $!";
-    return @errors;
-}
-
-sub validate_line {
-    my ($line) = @_;
-    return if line_empty($line);
-
-    my @fields = Froogle::Utils::Data::split_line($line);
+# Takes the fields of a non-empty line, returns an error message if invalid
+sub validate_fields {
+    my (@fields) = @_;
 
     my $date_idx = Froogle::Constants::FIELD_INDEX_DATE();
     my $type_idx = Froogle::Constants::FIELD_INDEX_TYPE();
@@ -110,11 +90,6 @@ sub validate_transfer {
     return undef;
 }
 
-sub line_empty {
-    my $line = shift;
-    return Froogle::Utils::Formatting::trim($line) eq '';
-}
-
-our @EXPORT_OK = qw(validate_file);
+our @EXPORT_OK = qw(validate_fields);
 
 1;
