@@ -136,27 +136,18 @@ sub total_income_for_transactions {
     return $total;
 }
 
-sub encode_transaction {
-    my $record = shift;
-    my @keys = Froogle::Constants::FILE_KEY_MAPPING();
-    my @values = ();
-    for my $key (@keys) {
-        my $val = $record->{$key};
-        $val = '' if !defined $val;
-        push @values, $val;
-    }
-    my $line = join(' ; ', @values);
-    $line =~ s/[ ;]+$//;  # Remove any combination of whitespace and semicolons from the end
-    return $line;
-}
+# Marks an unsettled transaction line as settled. Only the SETTLED field is
+# changed, so the rest of the line keeps its exact formatting
+sub settle_line {
+    my $line = shift;
+    return $line if line_empty($line);
 
-sub write_transactions_to_file {
-    my @transactions = @_;
-    open my $fh, '>', Froogle::Constants::DATA_FILE_PATH() or die "Could not open output file: $!";
-    foreach my $transaction (@transactions) {
-        print $fh encode_transaction($transaction) . "\n";
-    }
-    close $fh;
+    my %transaction = decode_transaction($line);
+    return $line unless is_unsettled(\%transaction);
+
+    my $fields_before_settled = Froogle::Constants::FIELD_INDEX_SETTLED();
+    $line =~ s/^((?:[^;]*;){$fields_before_settled}\s*)0/${1}1/;
+    return $line;
 }
 
 sub line_empty {
@@ -165,6 +156,6 @@ sub line_empty {
 }
 
 
-our @EXPORT_OK = qw(split_line get_transactions is_unsettled amount_owed_for_transaction total_income_for_transactions encode_transaction write_transactions_to_file);
+our @EXPORT_OK = qw(split_line get_transactions is_unsettled amount_owed_for_transaction total_income_for_transactions settle_line);
 
 1;
