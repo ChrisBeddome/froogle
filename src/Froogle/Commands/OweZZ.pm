@@ -6,6 +6,7 @@ use warnings;
 use feature 'say';
 use Exporter 'import';
 
+use Froogle::Constants ();
 use Froogle::Utils::Data ();
 use Froogle::Utils::Currency ();
 
@@ -17,6 +18,10 @@ sub applicable_options {
     return qw();
 }
 
+sub applicable_transaction_types {
+    return (Froogle::Constants::TRANSACTION_TYPE_EXPENSE());
+}
+
 sub defaults {
     return ();
 }
@@ -25,7 +30,7 @@ sub run {
     my $owe_zz = 0;
     my @need_settling = ();
 
-    my @transactions = Froogle::Utils::Data::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
     foreach (@transactions) {
         my $transaction = $_;
         if (Froogle::Utils::Data::is_unsettled($transaction)) {

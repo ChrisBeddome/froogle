@@ -21,7 +21,9 @@ sub split_line {
     return map { s/^\s+|\s+$//gr } split /;\s*/, $line;
 }
 
+# Criteria (all optional): types => [transaction types to keep]
 sub get_transactions {
+    my %criteria = @_;
     open(my $fh, '<', Froogle::Constants::DATA_FILE_PATH()) or die "Error when attempting to open file" .  Froogle::Constants::DATA_FILE_PATH() . ":\n$!";
 
     my ($transactions, $errors) = parse_file($fh);
@@ -32,7 +34,7 @@ sub get_transactions {
         Froogle::UserErrorHandler::raise("INVALID_DATA");
     }
 
-    return filter_transactions(@$transactions);
+    return filter_transactions($transactions, %criteria);
 }
 
 # Validates and decodes every line in a single pass, splitting each line once
@@ -85,14 +87,21 @@ sub decode_fields {
 }
 
 sub filter_transactions {
+    my ($transactions, %criteria) = @_;
     my %options = Froogle::OptionsManager::get_options();
-    my $command = Froogle::OptionsManager::get_command();
-    my @transactions = @_;
+
+    my %wanted_types = ();
+    if (defined $criteria{types}) {
+        foreach my $type (@{ $criteria{types} }) {
+            $wanted_types{$type} = 1;
+        }
+    }
+
     my @filtered_transactions = ();
 
-    foreach my $transaction (@transactions) {
-        if ($transaction->{type} ne Froogle::Constants::TRANSACTION_TYPE_EXPENSE()) {
-            next if grep { $command eq $_ } qw(list details zz);
+    foreach my $transaction (@$transactions) {
+        if (defined $criteria{types}) {
+            next unless $wanted_types{$transaction->{type}};
         }
         if (defined $options{from} && defined $options{to}) {
             next unless Froogle::Utils::Date::is_date_in_range($transaction->{date}, $options{from}, $options{to});

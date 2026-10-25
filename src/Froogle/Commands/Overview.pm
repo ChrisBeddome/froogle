@@ -20,6 +20,10 @@ sub applicable_options {
     return qw(from to);
 }
 
+sub applicable_transaction_types {
+    return Froogle::Constants::TRANSACTION_TYPES();
+}
+
 sub defaults {
     return (
         to => Froogle::Utils::Date::get_today(),
@@ -37,7 +41,7 @@ sub run {
     my $pas_transfers = 0;
     my $sas_transfers = 0;
 
-    my @transactions = Froogle::Utils::Data::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
 
     foreach my $transaction (@transactions) {
         if ($transaction->{type} eq Froogle::Constants::TRANSACTION_TYPE_INCOME()) {

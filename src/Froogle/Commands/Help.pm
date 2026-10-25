@@ -16,6 +16,10 @@ sub applicable_options {
     return qw();
 }
 
+sub applicable_transaction_types {
+    return ();
+}
+
 sub defaults {
     return ();
 }

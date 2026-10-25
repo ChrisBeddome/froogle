@@ -6,6 +6,7 @@ use warnings;
 use feature 'say';
 use Exporter 'import';
 
+use Froogle::Constants ();
 use Froogle::Utils::Data ();
 
 sub name {
@@ -14,6 +15,10 @@ sub name {
 
 sub applicable_options {
     return qw();
+}
+
+sub applicable_transaction_types {
+    return Froogle::Constants::TRANSACTION_TYPES();
 }
 
 sub defaults {
@@ -25,7 +30,7 @@ sub run {
     return unless $user_confirmation;
 
     # Validate the whole file first so nothing is written if it is invalid
-    Froogle::Utils::Data::get_transactions();
+    Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
 
     my @original_lines = Froogle::Utils::Data::read_data_file();
     my @settled_lines = map { Froogle::Utils::Data::settle_line($_) } @original_lines;
