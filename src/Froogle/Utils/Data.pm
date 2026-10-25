@@ -4,6 +4,9 @@ use strict;
 use warnings;
 
 use feature 'say';
+use Cwd ();
+use File::Temp ();
+use IO::Handle ();
 use Exporter 'import';
 
 use Froogle::Constants ();
@@ -156,12 +159,64 @@ sub settle_line {
     return $line;
 }
 
+sub read_data_file {
+    my $file = data_file_real_path();
+    open my $fh, '<', $file or die "Could not open $file: $!";
+    my @lines = <$fh>;
+    close $fh;
+    return @lines;
+}
+
+# Writes the lines to the data file's backup (the data file path plus .bak)
+sub backup_data_file {
+    my @lines = @_;
+    my $file = data_file_real_path();
+    write_lines_atomically($file . '.bak', data_file_mode($file), @lines);
+}
+
+sub write_data_file {
+    my @lines = @_;
+    my $file = data_file_real_path();
+    write_lines_atomically($file, data_file_mode($file), @lines);
+}
+
+my $resolved_data_file_path;
+
+# Resolves symlinks so writes update the file a link points to rather than replacing the
+# link. Resolved once, so reading, backing up and writing all use the same file even if
+# writing the backup changes where a chain of links leads
+sub data_file_real_path {
+    if (!defined $resolved_data_file_path) {
+        $resolved_data_file_path = Cwd::abs_path(Froogle::Constants::DATA_FILE_PATH());
+    }
+    return $resolved_data_file_path;
+}
+
+# Permission bits of the data file, kept for the backup and the rewritten file
+sub data_file_mode {
+    my $file = shift;
+    my @file_info = stat($file) or die "Could not read $file: $!";
+    return $file_info[2] & 07777;
+}
+
+# Writes to a temporary file beside $file and renames it into place, so $file is
+# never left partially written. The rename replaces whatever is at $file (even a
+# symlink or a read-only file) rather than writing through it
+sub write_lines_atomically {
+    my ($file, $mode, @lines) = @_;
+    my $temp = File::Temp->new(TEMPLATE => "$file.XXXXXX");  # removed on failure
+    print $temp @lines or die "Could not write $temp: $!";
+    $temp->flush and $temp->sync or die "Could not write $temp: $!";
+    chmod($mode, $temp->filename) or die "Could not set permissions on $temp: $!";
+    rename $temp->filename, $file or die "Could not replace $file: $!";
+}
+
 sub line_empty {
     my $line = shift;
     return Froogle::Utils::Formatting::trim($line) eq '';
 }
 
 
-our @EXPORT_OK = qw(split_line get_transactions is_unsettled amount_owed_for_transaction total_income_for_transactions settle_line);
+our @EXPORT_OK = qw(split_line get_transactions is_unsettled amount_owed_for_transaction total_income_for_transactions settle_line read_data_file backup_data_file write_data_file);
 
 1;
