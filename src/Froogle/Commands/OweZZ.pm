@@ -3,12 +3,11 @@ package Froogle::Commands::OweZZ;
 use strict;
 use warnings;
 
-use feature 'say';
 use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Utils::Data ();
-use Froogle::Utils::Currency ();
+use Froogle::Output::OweZZ ();
 
 sub name {
     return "zz";
@@ -27,25 +26,22 @@ sub defaults {
 }
 
 sub run {
-    my $owe_zz = 0;
-    my @need_settling = ();
+    my $total_owed = 0;
+    my @debts = ();
 
     my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
-    foreach (@transactions) {
-        my $transaction = $_;
+    foreach my $transaction (@transactions) {
         if (Froogle::Utils::Data::is_unsettled($transaction)) {
-            push(@need_settling, $transaction); 
-            $owe_zz += Froogle::Utils::Data::amount_owed_for_transaction($transaction);
+            my $amount_owed = Froogle::Utils::Data::amount_owed_for_transaction($transaction);
+            push(@debts, { transaction => $transaction, amount_owed => $amount_owed });
+            $total_owed += $amount_owed;
         }
     }
 
-    say "";
-    for my $i (0 .. $#need_settling) {
-        say Froogle::Utils::Currency::format_debt_line($need_settling[$i]);
-    }
-    say "                                                                ==============";
-    say Froogle::Utils::Currency::who_owe_who_text($owe_zz) . ":                                                      " . Froogle::Utils::Currency::format_currency(abs($owe_zz), Froogle::Constants::CURRENCY_FORMAT_WIDTH());
-    say "";
+    Froogle::Output::OweZZ::print_report(
+        debts => \@debts,
+        total_owed => $total_owed,
+    );
 }
 
 our @EXPORT_OK = qw(name run);

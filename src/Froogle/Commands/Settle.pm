@@ -3,11 +3,11 @@ package Froogle::Commands::Settle;
 use strict;
 use warnings;
 
-use feature 'say';
 use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Utils::Data ();
+use Froogle::Output::Settle ();
 
 sub name {
     return "settle";
@@ -26,7 +26,7 @@ sub defaults {
 }
 
 sub run {
-    my $user_confirmation = get_confirmation("Are you sure you want to mark all transactions as settled? (y/n):");
+    my $user_confirmation = Froogle::Output::Settle::confirm_settle();
     return unless $user_confirmation;
 
     # Validate the whole file first so nothing is written if it is invalid
@@ -38,21 +38,7 @@ sub run {
     Froogle::Utils::Data::backup_data_file(@original_lines);
     Froogle::Utils::Data::write_data_file(@settled_lines);
 
-    say "";
-    say "All outstanding shared transactions have been marked as settled";
-    say "";
-}
-
-sub get_confirmation {
-    my $prompt = shift // "Are you sure? (y/n): ";
-    my $response = '';
-    while ($response !~ /^[yn]$/i) {
-        say $prompt;
-        $response = <STDIN>;
-        return 0 unless defined $response;  # stdin closed, treat as "n"
-        chomp $response;
-    }
-    return lc($response) eq 'y' ? 1 : 0;
+    Froogle::Output::Settle::print_settled();
 }
 
 
