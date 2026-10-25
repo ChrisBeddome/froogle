@@ -46,7 +46,11 @@ sub run {
     my $total_spending = sum(values %spending_per_categories);
     my $total_income = Froogle::Utils::Data::total_income_for_transactions(@transactions);
 
-    my @sorted_keys = sort { $spending_per_categories{$b} <=> $spending_per_categories{$a} } keys %spending_per_categories;
+    # Equal amounts are ordered by name, so the output doesn't vary between runs
+    my $category_names = Froogle::Constants::OUT_CATEGORY_CODES();
+    my @sorted_keys = sort {
+        $spending_per_categories{$b} <=> $spending_per_categories{$a} || $category_names->{$a} cmp $category_names->{$b}
+    } keys %spending_per_categories;
     say "Category                                    Amount    Percentage (spending)    Percentage (income)";
     say "=" x Froogle::Constants::SEPARATOR_LENGTH_CATEGORIES();
     for my $key (@sorted_keys) {

@@ -13,6 +13,9 @@ sub format_currency {
     my ($dollars, $width) = @_;
 
     my $formatted_amount = sprintf("%.2f", $dollars);
+    # Floating point noise around zero (e.g. income minus equal spending) would
+    # otherwise show as -0.00, depending on the order amounts were summed in
+    $formatted_amount = '0.00' if $formatted_amount eq '-0.00';
 
     if (defined $width) {
         my $total_length = $width - 1;  # Subtract 1 for the dollar sign
