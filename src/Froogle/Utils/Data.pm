@@ -21,33 +21,35 @@ sub split_line {
 sub get_transactions {
     open(my $fh, '<', Froogle::Constants::DATA_FILE_PATH()) or die "Error when attempting to open file" .  Froogle::Constants::DATA_FILE_PATH() . ":\n$!";
 
-    my @errors = Froogle::Validators::FileValidator::validate_file($fh);
-    if (@errors > 0) {
-        report_errors(@errors);
-        close($fh);
+    my ($transactions, $errors) = parse_file($fh);
+    close($fh);
+
+    if (@$errors > 0) {
+        report_errors(@$errors);
         Froogle::UserErrorHandler::raise("INVALID_DATA");
     }
 
-    my @transactions = parse_file($fh);
-    @transactions = filter_transactions(@transactions);
-
-    close($fh);
-
-    return @transactions;
+    return filter_transactions(@$transactions);
 }
 
+# Validates and decodes every line in a single pass, splitting each line once
 sub parse_file {
     my $fh = shift;
-    my @records;
+    my (@records, @errors);
 
     while (my $line = <$fh>) {
         chomp $line;
         next if (line_empty($line));
-        my %record = decode_transaction($line);
-        push @records, \%record;
+        my @fields = split_line($line);
+        my $error = Froogle::Validators::FileValidator::validate_fields(@fields);
+        if ($error) {
+            push(@errors, {line => $., message => $error});
+            next;
+        }
+        push @records, decode_fields(@fields);
     }
 
-    return @records;
+    return (\@records, \@errors);
 }
 
 sub report_errors {
@@ -60,8 +62,12 @@ sub report_errors {
 sub decode_transaction {
     my $line = shift;
     chomp $line;
+    return %{ decode_fields(split_line($line)) };
+}
+
+sub decode_fields {
+    my @values = @_;
     my @keys = Froogle::Constants::FILE_KEY_MAPPING();
-    my @values = split_line($line);
     my %record;
 
     @record{@keys} = (undef) x @keys;
@@ -72,7 +78,7 @@ sub decode_transaction {
         }
     }
 
-    return %record;
+    return \%record;
 }
 
 sub filter_transactions {
