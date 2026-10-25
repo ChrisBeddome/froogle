@@ -33,8 +33,13 @@ sub defaults {
 }
 
 sub run {
+    my ($class, $options) = @_;
     my %spending_per_categories;
-    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
+    my @transactions = Froogle::Utils::Data::get_transactions(
+        types => [applicable_transaction_types()],
+        from => $options->{from},
+        to => $options->{to},
+    );
     for my $key (keys %{Froogle::Constants::OUT_CATEGORY_CODES()}) {
         $spending_per_categories{$key} = 0;
     }
@@ -44,7 +49,7 @@ sub run {
         }
     }
     say "";
-    say Froogle::Utils::Date::formatted_date_range();
+    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
     say "";
 
     my $total_spending = sum(values %spending_per_categories);

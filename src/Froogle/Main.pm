@@ -12,7 +12,7 @@ sub run {
     Froogle::OptionsManager::initialize(\@ARGV);
     my %options = Froogle::OptionsManager::get_options();
     my $command = Froogle::OptionsManager::get_command();
-    Froogle::CommandDispatcher::run_command($command, %options);
+    Froogle::CommandDispatcher::run_command($command, \%options);
 }
 
 our @EXPORT_OK = qw(run);

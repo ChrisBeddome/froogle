@@ -11,7 +11,6 @@ use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Validators::FileValidator ();
-use Froogle::OptionsManager ();
 use Froogle::Utils::Date ();
 use Froogle::Utils::Formatting ();
 use Froogle::UserErrorHandler ();
@@ -21,7 +20,9 @@ sub split_line {
     return map { s/^\s+|\s+$//gr } split /;\s*/, $line;
 }
 
-# Criteria (all optional): types => [transaction types to keep]
+# Returns the transactions matching every criterion given. Criteria (all optional):
+# types => [transaction types], from => date, to => date (both inclusive),
+# necessity => level, category => code
 sub get_transactions {
     my %criteria = @_;
     open(my $fh, '<', Froogle::Constants::DATA_FILE_PATH()) or die "Error when attempting to open file" .  Froogle::Constants::DATA_FILE_PATH() . ":\n$!";
@@ -88,7 +89,6 @@ sub decode_fields {
 
 sub filter_transactions {
     my ($transactions, %criteria) = @_;
-    my %options = Froogle::OptionsManager::get_options();
 
     my %wanted_types = ();
     if (defined $criteria{types}) {
@@ -103,14 +103,17 @@ sub filter_transactions {
         if (defined $criteria{types}) {
             next unless $wanted_types{$transaction->{type}};
         }
-        if (defined $options{from} && defined $options{to}) {
-            next unless Froogle::Utils::Date::is_date_in_range($transaction->{date}, $options{from}, $options{to});
+        if (defined $criteria{from}) {
+            next if Froogle::Utils::Date::compare_dates($transaction->{date}, $criteria{from}) < 0;
         }
-        if (defined $options{necessity}) {
-            next unless $transaction->{necessity} == $options{necessity};
+        if (defined $criteria{to}) {
+            next if Froogle::Utils::Date::compare_dates($transaction->{date}, $criteria{to}) > 0;
         }
-        if (defined $options{category}) {
-            next unless $transaction->{category} eq $options{category};
+        if (defined $criteria{necessity}) {
+            next unless defined $transaction->{necessity} && $transaction->{necessity} == $criteria{necessity};
+        }
+        if (defined $criteria{category}) {
+            next unless $transaction->{category} eq $criteria{category};
         }
         push(@filtered_transactions, $transaction);
     }
