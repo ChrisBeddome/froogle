@@ -20,17 +20,7 @@ sub ENVIRONMENT {
         }
     }
 
-    # Running from source - read from src/environment.conf
-    my $conf_path = Froogle::Utils::File::path_from_application_root('environment.conf');
-    if (-f $conf_path) {
-        open my $fh, '<', $conf_path or return 'development';
-        my $env = <$fh>;
-        close $fh;
-        chomp $env if defined $env;
-        return $env || 'development';
-    }
-
-    # Fallback to environment variable or default
+    # Otherwise (e.g. running from source) use the environment variable, or default to development
     return $ENV{FROOGLE_ENV} || 'development';
 }
 
