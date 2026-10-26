@@ -25,7 +25,12 @@ sub split_line {
 # necessity => level, category => code
 sub get_transactions {
     my %criteria = @_;
-    open(my $fh, '<', Froogle::Constants::DATA_FILE_PATH()) or die "Error when attempting to open file" .  Froogle::Constants::DATA_FILE_PATH() . ":\n$!";
+    my $data_file_path = Froogle::Constants::DATA_FILE_PATH();
+    # A directory opens without error but reads as empty, which would show empty reports
+    if (-d $data_file_path) {
+        Froogle::UserErrorHandler::raise('NO_DATA_FILE', "$data_file_path: Is a directory");
+    }
+    open(my $fh, '<', $data_file_path) or Froogle::UserErrorHandler::raise('NO_DATA_FILE', "$data_file_path: $!");
 
     my ($transactions, $errors) = parse_file($fh);
     close($fh);
