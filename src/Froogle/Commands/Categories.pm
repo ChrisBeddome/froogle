@@ -3,7 +3,6 @@ package Froogle::Commands::Categories;
 use strict;
 use warnings;
 
-use List::Util qw(sum);
 use Exporter 'import';
 
 use Froogle::Constants ();
@@ -47,7 +46,12 @@ sub run {
         }
     }
 
-    my $total_spending = sum(values %spending_per_categories);
+    # Added up in a fixed order: adding the amounts in hash order could round the
+    # total, and so the percentages, differently from run to run
+    my $total_spending = 0;
+    foreach my $category (sort keys %spending_per_categories) {
+        $total_spending += $spending_per_categories{$category};
+    }
     my $total_income = Froogle::Utils::Data::total_income_for_transactions(@transactions);
 
     # Equal amounts are ordered by name, so the output doesn't vary between runs
