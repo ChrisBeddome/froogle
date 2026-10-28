@@ -3,13 +3,12 @@ package Froogle::Commands::Details;
 use strict;
 use warnings;
 
-use feature 'say';
 use Exporter 'import';
 
 use Froogle::Utils::Data ();
 use Froogle::Utils::Date ();
-use Froogle::Utils::Currency ();
 use Froogle::Constants ();
+use Froogle::Output::Details ();
 
 sub name {
     return "details";
@@ -40,30 +39,11 @@ sub run {
         category => $options->{category},
     );
 
-    say "";
-    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
-
-    foreach (@transactions) {
-        my $transaction = $_;
-        say "";
-        print_transaction($transaction);
-        say "";
-    }
-    say "";
-}
-
-sub print_transaction {
-    my $transaction = shift;
-    say "Date:           $transaction->{date}";
-    say "Amount:         " . Froogle::Utils::Currency::format_currency($transaction->{amount});
-    say "Category:       $transaction->{category}";
-    say "Description:    $transaction->{desc}" if defined $transaction->{desc};
-    say "Necessity:      " . format_necessity($transaction->{necessity});
-}
-
-sub format_necessity {
-    my $necessity_num = shift;
-    return Froogle::Constants::NECESSITY_CODES->{$necessity_num};
+    Froogle::Output::Details::print_report(
+        from => $options->{from},
+        to => $options->{to},
+        transactions => \@transactions,
+    );
 }
 
 our @EXPORT_OK = qw(name run);

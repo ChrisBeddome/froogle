@@ -3,13 +3,12 @@ package Froogle::Commands::List;
 use strict;
 use warnings;
 
-use feature 'say';
 use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Utils::Data ();
 use Froogle::Utils::Date ();
-use Froogle::Utils::Currency ();
+use Froogle::Output::List ();
 
 sub name {
     return "list";
@@ -40,22 +39,11 @@ sub run {
         category => $options->{category},
     );
 
-    say "";
-    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
-    say "";
-
-    foreach (@transactions) {
-        my $transaction = $_;
-        print_transaction($transaction);
-    }
-    say "";
-}
-
-sub print_transaction {
-    my $transaction = shift;
-    my $desc = $transaction->{'desc'} // Froogle::Constants::COMBINED_CATEGORY_CODES()->{$transaction->{'category'}};
-    my $amount = Froogle::Utils::Currency::format_currency($transaction->{amount}, Froogle::Constants::CURRENCY_FORMAT_WIDTH());
-    say "$amount on $transaction->{date} for $desc";
+    Froogle::Output::List::print_report(
+        from => $options->{from},
+        to => $options->{to},
+        transactions => \@transactions,
+    );
 }
 
 

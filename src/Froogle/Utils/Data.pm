@@ -3,7 +3,6 @@ package Froogle::Utils::Data;
 use strict;
 use warnings;
 
-use feature 'say';
 use Cwd ();
 use File::Temp ();
 use IO::Handle ();
@@ -14,6 +13,7 @@ use Froogle::Validators::FileValidator ();
 use Froogle::Utils::Date ();
 use Froogle::Utils::Formatting ();
 use Froogle::UserErrorHandler ();
+use Froogle::Output::Errors ();
 
 sub split_line {
     my $line = shift;
@@ -31,7 +31,7 @@ sub get_transactions {
     close($fh);
 
     if (@$errors > 0) {
-        report_errors(@$errors);
+        Froogle::Output::Errors::print_validation_errors(@$errors);
         Froogle::UserErrorHandler::raise("INVALID_DATA");
     }
 
@@ -56,13 +56,6 @@ sub parse_file {
     }
 
     return (\@records, \@errors);
-}
-
-sub report_errors {
-    my (@errors) = @_;
-    foreach my $error (@errors) {
-        say "Error on line $error->{line}: $error->{message}";
-    }
 }
 
 sub decode_transaction {

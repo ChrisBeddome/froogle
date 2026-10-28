@@ -3,15 +3,13 @@ package Froogle::Commands::Categories;
 use strict;
 use warnings;
 
-use feature 'say';
 use List::Util qw(sum);
 use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Utils::Data ();
 use Froogle::Utils::Date ();
-use Froogle::Utils::Currency ();
-use Froogle::Utils::Formatting ();
+use Froogle::Output::Categories ();
 
 sub name {
     return "cats";
@@ -48,9 +46,6 @@ sub run {
             $spending_per_categories{$transaction->{category}} += $transaction->{amount};
         }
     }
-    say "";
-    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
-    say "";
 
     my $total_spending = sum(values %spending_per_categories);
     my $total_income = Froogle::Utils::Data::total_income_for_transactions(@transactions);
@@ -60,21 +55,23 @@ sub run {
     my @sorted_keys = sort {
         $spending_per_categories{$b} <=> $spending_per_categories{$a} || $category_names->{$a} cmp $category_names->{$b}
     } keys %spending_per_categories;
-    say "Category                                    Amount    Percentage (spending)    Percentage (income)";
-    say "=" x Froogle::Constants::SEPARATOR_LENGTH_CATEGORIES();
+
+    my @rows = ();
     for my $key (@sorted_keys) {
-        my $cat_text = Froogle::Utils::Formatting::truncate_or_pad(
-            Froogle::Constants::OUT_CATEGORY_CODES()->{$key},
-            Froogle::Constants::CATEGORY_TEXT_WIDTH()
-        );
-        my $percentage_of_spending = $total_spending > 0 ? $spending_per_categories{$key} / $total_spending * 100 : 0;
-        my $percentage_of_income = $total_income > 0 ? $spending_per_categories{$key} / $total_income * 100 : 0;
-        my $percentage_of_spending_text = Froogle::Utils::Formatting::format_percentage($percentage_of_spending);
-        my $percentage_of_income_text = Froogle::Utils::Formatting::format_percentage($percentage_of_income);
-        say $cat_text . Froogle::Utils::Currency::format_currency($spending_per_categories{$key}, Froogle::Constants::CURRENCY_FORMAT_WIDTH()) . "                   " . $percentage_of_spending_text . "                " . $percentage_of_income_text;
+        my $amount = $spending_per_categories{$key};
+        push(@rows, {
+            name => $category_names->{$key},
+            amount => $amount,
+            percentage_of_spending => $total_spending > 0 ? $amount / $total_spending * 100 : 0,
+            percentage_of_income => $total_income > 0 ? $amount / $total_income * 100 : 0,
+        });
     }
 
-    say "";
+    Froogle::Output::Categories::print_report(
+        from => $options->{from},
+        to => $options->{to},
+        rows => \@rows,
+    );
 }
 
 our @EXPORT_OK = qw(name run);

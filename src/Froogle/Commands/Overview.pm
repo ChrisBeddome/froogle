@@ -3,14 +3,13 @@ package Froogle::Commands::Overview;
 use strict;
 use warnings;
 
-use feature 'say';
 use List::Util qw(sum);
 use Exporter 'import';
 
 use Froogle::Constants ();
 use Froogle::Utils::Data ();
 use Froogle::Utils::Date ();
-use Froogle::Utils::Currency ();
+use Froogle::Output::Overview ();
 
 sub name {
     return "overview";
@@ -62,32 +61,21 @@ sub run {
         }
     }
 
-    my $width = Froogle::Constants::CURRENCY_FORMAT_WIDTH();
-    my $income_str = Froogle::Utils::Currency::format_currency($income, $width);
-    my $pas_str = Froogle::Utils::Currency::format_currency($pas_transfers, $width);
-    my $sas_str = Froogle::Utils::Currency::format_currency($sas_transfers, $width);
-    my $net_transfers = $pas_transfers - $sas_transfers;
-    my $net_transfers_str = Froogle::Utils::Currency::format_currency($net_transfers, $width);
-    my $necessary = Froogle::Utils::Currency::format_currency($spending{Froogle::Constants::NECESSITY_NECESSARY()}, $width);
-    my $unnecessary = Froogle::Utils::Currency::format_currency($spending{Froogle::Constants::NECESSITY_UNNECESSARY()}, $width);
-    my $frivolous = Froogle::Utils::Currency::format_currency($spending{Froogle::Constants::NECESSITY_FRIVOLOUS()}, $width);
+    my $total_spending = sum(values %spending);
 
-    say "";
-    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
-    say "";
-    say "Total Income:                   $income_str";
-    say "";
-    say "Purchase Assets:                $pas_str";
-    say "Sell Assets:                    $sas_str";
-    say "Net Transfers:                  $net_transfers_str";
-    say "";
-    say "Necessary spending:             $necessary";
-    say "Unnecessary spending:           $unnecessary";
-    say "Frivolous spending:             $frivolous";
-    say "Total Spending:                 " . Froogle::Utils::Currency::format_currency(sum(values %spending), $width);
-    say "";
-    say "Net                             " . Froogle::Utils::Currency::format_currency($income - sum(values %spending), $width);
-    say "";
+    Froogle::Output::Overview::print_report(
+        from => $options->{from},
+        to => $options->{to},
+        income => $income,
+        purchase_assets => $pas_transfers,
+        sell_assets => $sas_transfers,
+        net_transfers => $pas_transfers - $sas_transfers,
+        necessary_spending => $spending{Froogle::Constants::NECESSITY_NECESSARY()},
+        unnecessary_spending => $spending{Froogle::Constants::NECESSITY_UNNECESSARY()},
+        frivolous_spending => $spending{Froogle::Constants::NECESSITY_FRIVOLOUS()},
+        total_spending => $total_spending,
+        net => $income - $total_spending,
+    );
 }
 
 our @EXPORT_OK = qw(name run);

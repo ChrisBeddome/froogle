@@ -34,17 +34,6 @@ sub get_start_of_month {
     return sprintf("%04d-%02d-01", $year, $mon);
 }
 
-sub formatted_date_range {
-    my ($from, $to) = @_;
-    return format_date($from) . " - " . format_date($to);
-}
-
-sub format_date {
-    my $date = shift;
-    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-    return $months[substr($date, 5, 2) - 1] . " " . substr($date, 8, 2) . " " . substr($date, 0, 4);
-}
-
 # Compares two YYYY-MM-DD dates as numbers with the dashes removed: negative if the
 # first is earlier, zero if equal, positive if later. Comparing as numbers rather than
 # strings keeps an option value with a trailing newline (which validate_date accepts)
@@ -61,7 +50,7 @@ sub compare_dates {
     return $first_number <=> $second_number;
 }
 
-our @EXPORT_OK = qw(validate_date validate_option_date get_today get_start_of_month formatted_date_range compare_dates);
+our @EXPORT_OK = qw(validate_date validate_option_date get_today get_start_of_month compare_dates);
 
 1;
 
