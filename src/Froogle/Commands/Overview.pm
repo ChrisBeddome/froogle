@@ -3,7 +3,6 @@ package Froogle::Commands::Overview;
 use strict;
 use warnings;
 
-use List::Util qw(sum);
 use Exporter 'import';
 
 use Froogle::Constants ();
@@ -61,7 +60,12 @@ sub run {
         }
     }
 
-    my $total_spending = sum(values %spending);
+    # Added up in a fixed order: adding the amounts in hash order could round the
+    # total differently from run to run
+    my $total_spending = 0;
+    foreach my $necessity (sort keys %spending) {
+        $total_spending += $spending{$necessity};
+    }
 
     Froogle::Output::Overview::print_report(
         from => $options->{from},
