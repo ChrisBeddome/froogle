@@ -31,10 +31,17 @@ sub defaults {
 }
 
 sub run {
-    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
+    my ($class, $options) = @_;
+    my @transactions = Froogle::Utils::Data::get_transactions(
+        types => [applicable_transaction_types()],
+        from => $options->{from},
+        to => $options->{to},
+        necessity => $options->{necessity},
+        category => $options->{category},
+    );
 
     say "";
-    say Froogle::Utils::Date::formatted_date_range();
+    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
     say "";
 
     foreach (@transactions) {

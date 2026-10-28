@@ -32,6 +32,7 @@ sub defaults {
 }
 
 sub run {
+    my ($class, $options) = @_;
     my %spending = (
         Froogle::Constants::NECESSITY_FRIVOLOUS() => 0,
         Froogle::Constants::NECESSITY_UNNECESSARY() => 0,
@@ -41,7 +42,11 @@ sub run {
     my $pas_transfers = 0;
     my $sas_transfers = 0;
 
-    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
+    my @transactions = Froogle::Utils::Data::get_transactions(
+        types => [applicable_transaction_types()],
+        from => $options->{from},
+        to => $options->{to},
+    );
 
     foreach my $transaction (@transactions) {
         if ($transaction->{type} eq Froogle::Constants::TRANSACTION_TYPE_INCOME()) {
@@ -68,7 +73,7 @@ sub run {
     my $frivolous = Froogle::Utils::Currency::format_currency($spending{Froogle::Constants::NECESSITY_FRIVOLOUS()}, $width);
 
     say "";
-    say Froogle::Utils::Date::formatted_date_range();
+    say Froogle::Utils::Date::formatted_date_range($options->{from}, $options->{to});
     say "";
     say "Total Income:                   $income_str";
     say "";
