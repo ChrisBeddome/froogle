@@ -19,6 +19,10 @@ sub applicable_options {
     return qw(from to necessity category);
 }
 
+sub applicable_transaction_types {
+    return (Froogle::Constants::TRANSACTION_TYPE_EXPENSE());
+}
+
 sub defaults {
     return (
         to => Froogle::Utils::Date::get_today(),
@@ -27,7 +31,7 @@ sub defaults {
 }
 
 sub run {
-    my @transactions = Froogle::Utils::Data::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
 
     say "";
     say Froogle::Utils::Date::formatted_date_range();

@@ -21,6 +21,10 @@ sub applicable_options {
     return qw(from to);
 }
 
+sub applicable_transaction_types {
+    return (Froogle::Constants::TRANSACTION_TYPE_INCOME(), Froogle::Constants::TRANSACTION_TYPE_EXPENSE());
+}
+
 sub defaults {
     return (
         to => Froogle::Utils::Date::get_today(),
@@ -30,7 +34,7 @@ sub defaults {
 
 sub run {
     my %spending_per_categories;
-    my @transactions = Froogle::Utils::Data::get_transactions;
+    my @transactions = Froogle::Utils::Data::get_transactions(types => [applicable_transaction_types()]);
     for my $key (keys %{Froogle::Constants::OUT_CATEGORY_CODES()}) {
         $spending_per_categories{$key} = 0;
     }
